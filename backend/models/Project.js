@@ -1,45 +1,26 @@
 const mongoose = require('mongoose');
 
 const ProjectSchema = new mongoose.Schema({
-    studentId: {
+    student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
     },
-    title: {
+    title: String,
+    description: String,
+    techStack: [String],
+    githubLink: {
         type: String,
-        required: true,
-    },
-    description: {
-        type: String,
-        required: true,
-    },
-    techStack: {
-        type: [String],
-        default: [],
-    },
-    repoLink: {
-        type: String,
-    },
-    liveLink: {
-        type: String,
+        required: true // Assuming it's mandatory based on "student WILL provide"
     },
     verified: {
         type: Boolean,
-        default: false,
+        default: false
     },
-    extractedSkills: {
-        type: [String],
-        default: [],
-    },
+    extractedSkills: [String],
     readinessScore: {
         type: Number,
-        default: 0,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+        default: 0
+    }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Project', ProjectSchema);
