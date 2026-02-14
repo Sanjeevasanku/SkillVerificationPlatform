@@ -25,8 +25,27 @@ const Dashboard = () => {
                         Role: <strong>{user.role.toUpperCase()}</strong>
                     </p>
                     <div style={{ marginTop: '20px' }}>
-                        {/* Placeholder for future widgets */}
-                        <p>Your dashboard is ready. Upload a project to get started.</p>
+                        <button
+                            onClick={() => navigate('/upload-project')}
+                            className="btn-primary"
+                            style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', marginRight: '10px' }}
+                        >
+                            🚀 Upload New Project
+                        </button>
+                        <button
+                            onClick={() => navigate('/my-projects')}
+                            className="btn-secondary"
+                            style={{
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                border: '1px solid var(--primary-color)',
+                                color: 'var(--primary-color)'
+                            }}
+                        >
+                            📂 View My Projects
+                        </button>
                     </div>
                 </div>
             ) : (

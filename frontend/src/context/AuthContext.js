@@ -64,14 +64,9 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            // Create a verify route later or decode token?
-            // For now, we assume if token exists, we are somewhat good, 
-            // but ideally we call /api/auth/me. 
-            // Since we didn't make that yet, we can't fully load.
-            // Let's just set loading false if validation fails.
-            dispatch({ type: 'AUTH_ERROR' });
-            // Note: To fully implement loadUser, we need an endpoint.
-            // User didn't ask for /me yet. We'll rely on Login/Register response.
+            // Placeholder for /me endpoint if added later
+            // const res = await api.get('/auth/me');
+            // dispatch({ type: 'USER_LOADED', payload: res.data });
         } catch (err) {
             dispatch({ type: 'AUTH_ERROR' });
         }
@@ -81,6 +76,8 @@ export const AuthProvider = ({ children }) => {
     const register = async (formData) => {
         try {
             const res = await api.post('/auth/register', formData);
+
+            setAuthToken(res.data.token); // Set token in headers
 
             dispatch({
                 type: 'REGISTER_SUCCESS',
@@ -99,6 +96,8 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await api.post('/auth/login', formData);
 
+            setAuthToken(res.data.token); // Set token in headers
+
             dispatch({
                 type: 'LOGIN_SUCCESS',
                 payload: res.data,
@@ -112,7 +111,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Logout
-    const logout = () => dispatch({ type: 'LOGOUT' });
+    const logout = () => {
+        setAuthToken(null);
+        dispatch({ type: 'LOGOUT' });
+    };
 
     // Clear Errors
     const clearErrors = () => dispatch({ type: 'CLEAR_ERRORS' });
@@ -138,9 +140,14 @@ export const AuthProvider = ({ children }) => {
 
 export const setAuthToken = (token) => {
     if (token) {
-        api.defaults.headers.common['x-auth-token'] = token;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Updated to match backend
+        localStorage.setItem('token', token);
+        console.log('--- AUTH TOKEN (Copy this for manual testing) ---');
+        console.log(token);
+        console.log('---------------------------------------------');
     } else {
-        delete api.defaults.headers.common['x-auth-token'];
+        delete api.defaults.headers.common['Authorization'];
+        localStorage.removeItem('token');
     }
 }
 
