@@ -1,100 +1,121 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthLayout from '../components/layout/AuthLayout';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
 
 const Register = () => {
+    const { register, isAuthenticated, error, clearErrors } = useContext(AuthContext);
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        role: 'student',
+        role: 'student', // default
     });
-
-    const { register, error, clearErrors } = useContext(AuthContext);
-    const navigate = useNavigate();
-
-    // Clear errors when component unmounts or navigates? 
-    // Ideally we use useEffect.
-    React.useEffect(() => {
-        if (error) clearErrors();
-        // eslint-disable-next-line
-    }, []);
 
     const { name, email, password, role } = formData;
 
-    const onChange = (e) =>
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        await register(formData);
-        if (!error) {
-            // We can't immediately know success unless we await and check result or use effect on isAuthenticated
-            // But for now, if register is successful, it updates state. 
-            // Logic in Register.js was: await register; navigate.
-            // But if register fails, we shouldn't navigate.
-            // We need to check if we are authenticated.
-        }
-    };
-
-    // Better logic: Use useEffect to redirect if isAuthenticated
-    const { isAuthenticated } = useContext(AuthContext);
-    React.useEffect(() => {
+    useEffect(() => {
         if (isAuthenticated) {
             navigate('/dashboard');
         }
-    }, [isAuthenticated, navigate]);
+        if (error) {
+            const timer = setTimeout(() => {
+                clearErrors();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+        // eslint-disable-next-line
+    }, [isAuthenticated, navigate, error]);
+
+    const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    const onSubmit = e => {
+        e.preventDefault();
+        register({ name, email, password, role });
+    };
 
     return (
-        <div className='auth-form-container'>
-            <h1>Sign Up</h1>
-            {error && <div style={{ color: 'var(--error-color)', marginBottom: '15px' }}>{error}</div>}
+        <AuthLayout title="Create Account">
             <form onSubmit={onSubmit}>
-                <div>
-                    <label>Name</label>
-                    <input
-                        type='text'
-                        name='name'
-                        value={name}
+                <Input
+                    label="Full Name"
+                    type="text"
+                    name="name"
+                    value={name}
+                    onChange={onChange}
+                    required
+                    placeholder="e.g. John Doe"
+                />
+                <Input
+                    label="Email Address"
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={onChange}
+                    required
+                    placeholder="Enter your email"
+                />
+                <Input
+                    label="Password"
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={onChange}
+                    required
+                    placeholder="Create a password"
+                    minLength="6"
+                />
+
+                <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                        I am a...
+                    </label>
+                    <select
+                        name="role"
+                        value={role}
                         onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Email Address</label>
-                    <input
-                        type='email'
-                        name='email'
-                        value={email}
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type='password'
-                        name='password'
-                        value={password}
-                        onChange={onChange}
-                        required
-                        minLength='6'
-                    />
-                </div>
-                <div>
-                    <label>Role</label>
-                    <select name='role' value={role} onChange={onChange}>
-                        <option value='student'>Student</option>
-                        <option value='recruiter'>Recruiter</option>
-                        <option value='admin'>Admin</option>
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border-color)',
+                            fontSize: '1rem',
+                            outline: 'none',
+                            backgroundColor: 'var(--bg-secondary)',
+                            color: 'var(--text-primary)'
+                        }}
+                    >
+                        <option value="student">Student / Job Seeker</option>
+                        <option value="recruiter">Recruiter / Employer</option>
                     </select>
                 </div>
-                <button type='submit'>Register</button>
+
+                {error && (
+                    <div style={{
+                        color: 'var(--error-color)',
+                        fontSize: '0.9rem',
+                        marginBottom: '1rem',
+                        background: 'rgba(204, 16, 22, 0.1)',
+                        padding: '0.5rem',
+                        borderRadius: '4px'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                <Button type="submit" variant="primary" style={{ width: '100%' }}>
+                    Register
+                </Button>
             </form>
-            <p style={{ marginTop: '20px', color: 'var(--text-secondary)' }}>
-                Already have an account? <a href="/login">Login</a>
+
+            <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
+                Already on SkillVerify? <Link to="/login" style={{ fontWeight: '600' }}>Sign in</Link>
             </p>
-        </div>
+        </AuthLayout>
     );
 };
 

@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import ProjectUpload from './pages/ProjectUpload';
-import MyProjects from './pages/MyProjects';
-import './App.css';
+import './App.css'; // Keeping for any global styles not in index.css, though we should aim to remove it.
+
+// Lazy load components
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ProjectUpload = lazy(() => import('./pages/ProjectUpload'));
+const MyProjects = lazy(() => import('./pages/MyProjects'));
+
+const LoadingFallback = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: 'var(--bg-primary)'
+  }}>
+    <div className="loader"></div>
+  </div>
+);
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
+        <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -21,10 +35,11 @@ const App = () => {
             <Route path="/my-projects" element={<MyProjects />} />
             <Route path="/" element={<Login />} />
           </Routes>
-        </div>
+        </Suspense>
       </Router>
     </AuthProvider>
   );
 };
 
 export default App;
+
