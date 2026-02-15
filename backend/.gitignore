@@ -3,3 +3,9 @@ node_modules
 .DS_Store
 coverage
 .vscode
+
+# Ignore all .env files and variations
+.env
+.env.local
+.env.*.local
+/**/.env
