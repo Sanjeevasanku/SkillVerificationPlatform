@@ -17,6 +17,16 @@ const ProjectSchema = new mongoose.Schema({
         default: false
     },
     extractedSkills: [String],
+    structuredSkills: {
+        languages: [String],
+        frontend: [String],
+        backend: [String],
+        database: [String],
+        devops: [String],
+        testing: [String],
+        ml: [String],
+        tools: [String]
+    },
     readinessScore: {
         type: Number,
         default: 0

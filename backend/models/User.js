@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['student', 'recruiter', 'admin'],
         default: 'student',
     },
+    projects: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
+    }],
     createdAt: {
         type: Date,
         default: Date.now,

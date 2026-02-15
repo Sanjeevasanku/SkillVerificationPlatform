@@ -1,6 +1,5 @@
-const Project = require("../models/Project");
-
-const { extractSkills } = require('../utils/githubScanner');
+const Project = require('../models/Project');
+const { extractSkills } = require('../utils/advancedSkillExtractor');
 
 // Create Project
 exports.createProject = async (req, res) => {
@@ -8,7 +7,7 @@ exports.createProject = async (req, res) => {
         const { title, description, techStack, githubLink } = req.body;
 
         // Auto-extract skills & calculate readiness score
-        const { extractedSkills, readinessScore } = await extractSkills(githubLink);
+        const { extractedSkills, structuredSkills, readinessScore } = await extractSkills(githubLink);
 
         const project = await Project.create({
             student: req.user.id,
@@ -17,8 +16,13 @@ exports.createProject = async (req, res) => {
             techStack,
             githubLink,
             extractedSkills,
+            structuredSkills,
             readinessScore
         });
+
+        // Add project to user's projects array
+        const User = require('../models/User');
+        await User.findByIdAndUpdate(req.user.id, { $push: { projects: project._id } });
 
         res.status(201).json(project);
     } catch (error) {
