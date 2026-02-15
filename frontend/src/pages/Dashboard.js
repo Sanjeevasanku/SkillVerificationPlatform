@@ -1,58 +1,74 @@
 import React, { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/layout/Layout';
+import Card from '../components/common/Card';
+import Button from '../components/common/Button';
 
 const Dashboard = () => {
-    const { user, logout } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const onLogout = () => {
-        logout();
-        navigate('/login');
-    };
+    if (!user) {
+        return (
+            <Layout>
+                <div className="flex-center" style={{ height: '50vh' }}>
+                    <p>Loading user data...</p>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
-        <div className="dashboard-container">
-            <header className="dashboard-header">
-                <h1>Skill Verification Platform</h1>
-                {user && <button onClick={onLogout}>Logout</button>}
-            </header>
+        <Layout>
+            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <h1 style={{ marginBottom: '1.5rem' }}>Dashboard</h1>
 
-            {user ? (
-                <div className="card">
-                    <h2>Welcome back, <span style={{ color: 'var(--primary-color)' }}>{user.name}</span></h2>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '10px' }}>
-                        Role: <strong>{user.role.toUpperCase()}</strong>
+                <Card title={`Welcome back, ${user.name}`}>
+                    <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                        Role: <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{user.role.toUpperCase()}</span>
                     </p>
-                    <div style={{ marginTop: '20px' }}>
-                        <button
+
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <Button
+                            variant="primary"
+                            size="large"
                             onClick={() => navigate('/upload-project')}
-                            className="btn-primary"
-                            style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', marginRight: '10px' }}
                         >
                             🚀 Upload New Project
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="large"
                             onClick={() => navigate('/my-projects')}
-                            className="btn-secondary"
-                            style={{
-                                padding: '10px 20px',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                background: 'transparent',
-                                border: '1px solid var(--primary-color)',
-                                color: 'var(--primary-color)'
-                            }}
                         >
                             📂 View My Projects
-                        </button>
+                        </Button>
                     </div>
+                </Card>
+
+                <div style={{ marginTop: '2rem', display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+                    <Card title="Quick Stats">
+                        <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
+                            <div>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>0</h3>
+                                <p>Projects</p>
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--success-color)', margin: 0 }}>0</h3>
+                                <p>Verified</p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card title="Recent Activity">
+                        <p style={{ fontStyle: 'italic', color: 'var(--text-tertiary)' }}>No recent activity.</p>
+                    </Card>
                 </div>
-            ) : (
-                <p>Loading user data...</p>
-            )}
-        </div>
+            </div>
+        </Layout>
     );
 };
 
 export default Dashboard;
+

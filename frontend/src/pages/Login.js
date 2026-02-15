@@ -1,71 +1,85 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthLayout from '../components/layout/AuthLayout';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
 
 const Login = () => {
+    const { login, isAuthenticated, error, clearErrors } = useContext(AuthContext);
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
 
-    const { login, error, clearErrors, isAuthenticated } = useContext(AuthContext);
-    const navigate = useNavigate();
+    const { email, password } = formData;
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isAuthenticated) {
             navigate('/dashboard');
         }
+        if (error) {
+            const timer = setTimeout(() => {
+                clearErrors();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
         // eslint-disable-next-line
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, navigate, error]);
 
-    // Clear errors on mount
-    React.useEffect(() => {
-        if (error) clearErrors();
-        // eslint-disable-next-line
-    }, []);
+    const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const { email, password } = formData;
-
-    const onChange = (e) =>
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    const onSubmit = async (e) => {
+    const onSubmit = e => {
         e.preventDefault();
-        await login(formData);
+        login({ email, password });
     };
 
     return (
-        <div className='auth-form-container'>
-            <h1>Login</h1>
-            {error && <div style={{ color: 'var(--error-color)', marginBottom: '15px' }}>{error}</div>}
+        <AuthLayout title="Sign In">
             <form onSubmit={onSubmit}>
-                <div>
-                    <label>Email Address</label>
-                    <input
-                        type='email'
-                        name='email'
-                        value={email}
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type='password'
-                        name='password'
-                        value={password}
-                        onChange={onChange}
-                        required
-                        minLength='6'
-                    />
-                </div>
-                <button type='submit'>Login</button>
+                <Input
+                    label="Email Address"
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={onChange}
+                    required
+                    placeholder="Enter your email"
+                />
+                <Input
+                    label="Password"
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={onChange}
+                    required
+                    placeholder="Enter your password"
+                />
+
+                {error && (
+                    <div style={{
+                        color: 'var(--error-color)',
+                        fontSize: '0.9rem',
+                        marginBottom: '1rem',
+                        background: 'rgba(204, 16, 22, 0.1)',
+                        padding: '0.5rem',
+                        borderRadius: '4px'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
+                <Button type="submit" variant="primary" style={{ width: '100%' }}>
+                    Sign In
+                </Button>
             </form>
-            <p style={{ marginTop: '20px', color: 'var(--text-secondary)' }}>
-                Don't have an account? <a href="/register">Sign Up</a>
+
+            <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
+                New to SkillVerify? <Link to="/register" style={{ fontWeight: '600' }}>Join now</Link>
             </p>
-        </div>
+        </AuthLayout>
     );
 };
 
