@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../lib/api';
 
 const initialState = {
     token: localStorage.getItem('token'),
