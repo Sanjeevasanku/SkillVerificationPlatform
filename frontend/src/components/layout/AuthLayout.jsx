@@ -20,7 +20,7 @@ const AuthLayout = ({ children, title }) => {
                     {children}
                 </Card>
                 <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-                    &copy; {new Date().getFullYear()} Skill Verification Platform
+                    &copy; Skill Verification Platform
                 </div>
             </div>
         </div>

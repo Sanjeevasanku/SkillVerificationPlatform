@@ -41,7 +41,7 @@ const ProjectUpload = () => {
         <Layout>
             <div style={{ maxWidth: '700px', margin: '0 auto' }}>
                 <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                    <h1>🚀 Upload Project</h1>
+                    <h1>Upload Project</h1>
                     <p>Showcase your work to the world</p>
                 </div>
 
