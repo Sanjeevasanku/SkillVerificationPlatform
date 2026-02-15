@@ -20,7 +20,7 @@ const Layout = ({ children }) => {
                 fontSize: '0.85rem'
             }}>
                 <div className="container">
-                    &copy; {new Date().getFullYear()} Skill Verification Platform. All rights reserved.
+                    &copy; Skill Verification Platform
                 </div>
             </footer>
         </div>

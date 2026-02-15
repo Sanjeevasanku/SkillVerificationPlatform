@@ -35,14 +35,14 @@ const Dashboard = () => {
                             size="large"
                             onClick={() => navigate('/upload-project')}
                         >
-                            🚀 Upload New Project
+                            Upload New Project
                         </Button>
                         <Button
                             variant="secondary"
                             size="large"
                             onClick={() => navigate('/my-projects')}
                         >
-                            📂 View My Projects
+                            View My Projects
                         </Button>
                     </div>
                 </Card>
