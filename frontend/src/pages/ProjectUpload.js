@@ -16,6 +16,7 @@ const ProjectUpload = () => {
         description: '',
         githubLink: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { title, description, githubLink } = formData;
 
@@ -23,12 +24,16 @@ const ProjectUpload = () => {
 
     const onSubmit = async e => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             await api.post('/repositories', formData);
+            // Redirection is now immediate after verification
             navigate('/my-projects');
         } catch (err) {
             console.error(err);
             alert(err.response?.data?.reason || err.response?.data?.message || 'Error verifying repository');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -97,8 +102,13 @@ const ProjectUpload = () => {
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" variant="primary" style={{ flex: 2 }}>
-                                Verify & Submit
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                style={{ flex: 2 }}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Analyzing Repository...' : 'Verify & Submit'}
                             </Button>
                         </div>
                     </form>

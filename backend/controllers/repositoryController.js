@@ -109,21 +109,19 @@ exports.createRepository = async (req, res) => {
 
         await newRepo.save();
 
-        // 7. Trigger Skill Extraction (Background-like, but we await for the response in this phase)
-        // Note: Real production apps might use a queue, but here we process it for immediate feedback.
-        try {
-            const skills = await skillDetectionService.detectSkills(owner, repo);
+        // 7. Trigger Skill Extraction (Async background process for immediate frontend response)
+        // We don't 'await' this so the user is redirected immediately
+        skillDetectionService.detectSkills(owner, repo).then(async (skills) => {
             newRepo.skills = skills;
             await newRepo.save();
-        } catch (extractError) {
-            console.error('Skill extraction failed:', extractError.message);
-            // We don't fail the whole request because verification already passed
-        }
+            console.log(`[SkillDetection] Background analysis complete for ${owner}/${repo}`);
+        }).catch(extractError => {
+            console.error('Background skill extraction failed:', extractError.message);
+        });
 
         res.status(201).json({
-            message: "Repository verified and skills extracted successfully",
-            repositoryId: newRepo._id,
-            skillsCount: newRepo.skills.length
+            message: "Repository verification initiated. Analysis running in background.",
+            repositoryId: newRepo._id
         });
 
     } catch (err) {
