@@ -10,4 +10,11 @@ const auth = require('../middleware/authMiddleware');
  */
 router.post('/', auth, repositoryController.createRepository);
 
+/**
+ * @route   GET /api/repositories/my
+ * @desc    Get student's verified repositories
+ * @access  Private
+ */
+router.get('/my', auth, repositoryController.getMyRepositories);
+
 module.exports = router;
