@@ -1,15 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const authController = require('../controllers/authController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// @route   POST api/auth/register
-// @desc    Register user
-// @access  Public
-router.post('/register', register);
+/**
+ * @route   GET api/auth/github
+ * @desc    Redirect to GitHub OAuth
+ * @access  Public
+ */
+router.get('/github', authController.githubAuth);
 
-// @route   POST api/auth/login
-// @desc    Authenticate user & get token
-// @access  Public
-router.post('/login', login);
+/**
+ * @route   GET api/auth/github/callback
+ * @desc    GitHub OAuth callback
+ * @access  Public
+ */
+router.get('/github/callback', authController.githubCallback);
+
+/**
+ * @route   POST api/auth/login
+ * @desc    Authenticate student & get token (Manual Login)
+ * @access  Public
+ */
+router.post('/login', authController.login);
+
+/**
+ * @route   POST api/auth/register
+ * @desc    Register a new student
+ * @access  Public
+ */
+router.post('/register', authController.registerStudent);
+
+/**
+ * @route   GET api/auth/me
+ * @desc    Get current student
+ * @access  Private
+ */
+router.get('/me', authMiddleware, authController.getMe);
 
 module.exports = router;

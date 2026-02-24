@@ -58,7 +58,7 @@ const Navbar = () => {
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{user.name}</span>
+                                <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{user.fullName}</span>
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user.role}</span>
                             </div>
                             <Button variant="ghost" size="small" onClick={handleLogout}>

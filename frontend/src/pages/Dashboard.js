@@ -24,7 +24,7 @@ const Dashboard = () => {
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <h1 style={{ marginBottom: '1.5rem' }}>Dashboard</h1>
 
-                <Card title={`Welcome back, ${user.name}`}>
+                <Card title={`Welcome back, ${user.fullName || user.name || 'Student'}`}>
                     <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
                         Role: <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{user.role.toUpperCase()}</span>
                     </p>

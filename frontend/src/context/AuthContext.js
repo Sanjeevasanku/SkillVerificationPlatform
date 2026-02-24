@@ -61,33 +61,42 @@ export const AuthProvider = ({ children }) => {
     const loadUser = async () => {
         if (localStorage.token) {
             setAuthToken(localStorage.token);
+        } else {
+            dispatch({ type: 'AUTH_ERROR' });
+            return;
         }
 
         try {
-            // Placeholder for /me endpoint if added later
-            // const res = await api.get('/auth/me');
-            // dispatch({ type: 'USER_LOADED', payload: res.data });
+            const res = await api.get('/auth/me');
+            dispatch({ type: 'USER_LOADED', payload: res.data });
         } catch (err) {
             dispatch({ type: 'AUTH_ERROR' });
         }
     };
 
-    // Register User
-    const register = async (formData) => {
-        try {
-            const res = await api.post('/auth/register', formData);
+    useEffect(() => {
+        loadUser();
+        // eslint-disable-next-line
+    }, []);
 
-            setAuthToken(res.data.token); // Set token in headers
+    // Register Student
+    const register = async (studentData) => {
+        try {
+            const res = await api.post('/auth/register', studentData);
+
+            setAuthToken(res.data.token);
 
             dispatch({
                 type: 'REGISTER_SUCCESS',
                 payload: res.data,
             });
+            return { success: true };
         } catch (err) {
             dispatch({
                 type: 'REGISTER_FAIL',
-                payload: err.response.data.msg,
+                payload: err.response?.data?.msg || 'Registration failed',
             });
+            return { success: false, error: err.response?.data?.msg || 'Registration failed' };
         }
     };
 
@@ -105,9 +114,19 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             dispatch({
                 type: 'LOGIN_FAIL',
-                payload: err.response.data.msg,
+                payload: err.response?.data?.msg || 'Invalid Credentials',
             });
         }
+    };
+
+    // Login User with Token (from OAuth)
+    const loginWithToken = (token) => {
+        setAuthToken(token);
+        dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: { token }
+        });
+        loadUser();
     };
 
     // Logout
@@ -129,6 +148,7 @@ export const AuthProvider = ({ children }) => {
                 error: state.error,
                 register,
                 login,
+                loginWithToken,
                 logout,
                 clearErrors,
             }}

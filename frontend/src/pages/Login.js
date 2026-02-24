@@ -1,13 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import AuthLayout from '../components/layout/AuthLayout';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
 const Login = () => {
-    const { login, isAuthenticated, error, clearErrors } = useContext(AuthContext);
+    const { login, loginWithToken, isAuthenticated, error, clearErrors } = useContext(AuthContext);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -17,6 +18,11 @@ const Login = () => {
     const { email, password } = formData;
 
     useEffect(() => {
+        const token = searchParams.get('token');
+        if (token) {
+            loginWithToken(token);
+        }
+
         if (isAuthenticated) {
             navigate('/dashboard');
         }
@@ -26,8 +32,7 @@ const Login = () => {
             }, 3000);
             return () => clearTimeout(timer);
         }
-        // eslint-disable-next-line
-    }, [isAuthenticated, navigate, error]);
+    }, [isAuthenticated, navigate, error, searchParams, loginWithToken, clearErrors]);
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -36,8 +41,29 @@ const Login = () => {
         login({ email, password });
     };
 
+    const handleGithubLogin = () => {
+        window.location.href = 'http://localhost:5000/api/auth/github';
+    };
+
     return (
         <AuthLayout title="Sign In">
+            <div style={{ marginBottom: '1.5rem' }}>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleGithubLogin}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                >
+                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style={{ width: '20px' }} />
+                    Continue with GitHub
+                </Button>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.8rem', position: 'relative' }}>
+                <span style={{ background: 'var(--bg-primary)', padding: '0 10px', position: 'relative', zIndex: 1 }}>or sign in with email</span>
+                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderBottom: '1px solid var(--border-color)', zIndex: 0 }}></div>
+            </div>
+
             <form onSubmit={onSubmit}>
                 <Input
                     label="Email Address"
