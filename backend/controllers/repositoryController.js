@@ -1,6 +1,7 @@
 const Repository = require('../models/Repository');
 const parseGitHubUrl = require('../utils/parseGitHubUrl');
 const verificationService = require('../services/verificationService');
+const skillDetectionService = require('../services/skillDetectionService');
 const Student = require('../models/Student');
 
 /**
@@ -108,9 +109,21 @@ exports.createRepository = async (req, res) => {
 
         await newRepo.save();
 
+        // 7. Trigger Skill Extraction (Background-like, but we await for the response in this phase)
+        // Note: Real production apps might use a queue, but here we process it for immediate feedback.
+        try {
+            const skills = await skillDetectionService.detectSkills(owner, repo);
+            newRepo.skills = skills;
+            await newRepo.save();
+        } catch (extractError) {
+            console.error('Skill extraction failed:', extractError.message);
+            // We don't fail the whole request because verification already passed
+        }
+
         res.status(201).json({
-            message: "Repository verified successfully",
-            repositoryId: newRepo._id
+            message: "Repository verified and skills extracted successfully",
+            repositoryId: newRepo._id,
+            skillsCount: newRepo.skills.length
         });
 
     } catch (err) {

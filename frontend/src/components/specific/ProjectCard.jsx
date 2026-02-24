@@ -34,25 +34,32 @@ const ProjectCard = ({ project }) => {
                 {project.description}
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                    <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Primary Language</h4>
-                    <span style={{
-                        background: 'rgba(30, 64, 175, 0.1)',
-                        color: 'var(--brand-color)',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600'
-                    }}>
-                        {project.primaryLanguage || 'Unknown'}
-                    </span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                    <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Commits</h4>
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                        {project.commitCountByStudent} / {project.totalCommitCount}
-                    </span>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Verified Skills</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    {project.skills && project.skills.length > 0 ? (
+                        project.skills.map((skill, i) => (
+                            <div key={i} style={{
+                                background: 'rgba(5, 118, 66, 0.05)',
+                                border: '1px solid rgba(5, 118, 66, 0.15)',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--success-color)' }}>{skill.name}</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{(skill.confidenceScore * 100).toFixed(0)}%</span>
+                                </div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                                    {skill.evidence.join(', ')}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>No deep skills detected yet.</p>
+                    )}
                 </div>
             </div>
 
