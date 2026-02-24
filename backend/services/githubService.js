@@ -157,11 +157,80 @@ const fetchTotalCommitCount = async (owner, repo) => {
     }
 };
 
+/**
+ * Fetch repository contents (files/folders) at a specific path
+ * @param {string} owner Repository owner
+ * @param {string} repo Repository name
+ * @param {string} path Path to fetch (default "")
+ * @returns {Promise<Array|null>}
+ */
+const fetchRepoContents = async (owner, repo, path = "") => {
+    if (!process.env.GITHUB_TOKEN) {
+        console.error("[GitHubService] CRITICAL: GITHUB_TOKEN is missing in .env");
+    }
+    try {
+        const url = path
+            ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
+            : `https://api.github.com/repos/${owner}/${repo}/contents`;
+
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                Accept: "application/vnd.github.v3+json",
+            },
+        });
+        return response.data;
+    } catch (err) {
+        console.error(`[GitHubService] Error fetching ${path || 'root'}:`, err.response?.status, err.message);
+        return null;
+    }
+};
+
+/**
+ * Fetch and decode file content from GitHub
+ * @param {string} owner Repository owner
+ * @param {string} repo Repository name
+ * @param {string} path File path
+ * @returns {Promise<string|null>}
+ */
+const fetchFileContent = async (owner, repo, path) => {
+    try {
+        const response = await axios.get(
+            `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+            {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                    Accept: "application/vnd.github.v3+json",
+                },
+            }
+        );
+
+        const { content, encoding, size } = response.data;
+
+        // Skip files larger than 1MB
+        if (size > 1024 * 1024) {
+            console.warn(`Skipping large file: ${path} (${size} bytes)`);
+            return null;
+        }
+
+        if (encoding === "base64" && content) {
+            return Buffer.from(content, "base64").toString("utf-8");
+        }
+
+        return null;
+    } catch (err) {
+        // Skip errors for individual files to keep the engine running
+        return null;
+    }
+};
+
 module.exports = {
     exchangeCodeForToken,
     getUserData,
     fetchRepository,
     fetchLanguages,
     fetchCommitsByAuthor,
-    fetchTotalCommitCount
+    fetchTotalCommitCount,
+    fetchRepoContents,
+    fetchFileContent
 };
