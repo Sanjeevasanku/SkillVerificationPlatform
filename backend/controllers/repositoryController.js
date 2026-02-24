@@ -121,3 +121,20 @@ exports.createRepository = async (req, res) => {
         });
     }
 };
+
+/**
+ * @desc    Get all repositories belonging to the authenticated student
+ * @route   GET /api/repositories/my
+ * @access  Private (Student only)
+ */
+exports.getMyRepositories = async (req, res) => {
+    try {
+        const repositories = await Repository.find({ student: req.user.id })
+            .sort({ createdAt: -1 });
+
+        res.json(repositories);
+    } catch (err) {
+        console.error('Error in getMyRepositories:', err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+};

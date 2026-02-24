@@ -14,26 +14,21 @@ const ProjectUpload = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        techStack: '',
-        githubLink: '',
-        liveLink: ''
+        githubLink: ''
     });
 
-    const { title, description, techStack, githubLink, liveLink } = formData;
+    const { title, description, githubLink } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async e => {
         e.preventDefault();
         try {
-            await api.post('/projects', {
-                ...formData,
-                techStack: techStack.split(',').map(skill => skill.trim())
-            });
-            navigate('/dashboard');
+            await api.post('/repositories', formData);
+            navigate('/my-projects');
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Error uploading project');
+            alert(err.response?.data?.reason || err.response?.data?.message || 'Error verifying repository');
         }
     };
 
@@ -41,20 +36,20 @@ const ProjectUpload = () => {
         <Layout>
             <div style={{ maxWidth: '700px', margin: '0 auto' }}>
                 <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                    <h1>Upload Project</h1>
-                    <p>Showcase your work to the world</p>
+                    <h1>Verify Repository</h1>
+                    <p>Submit your GitHub repository for verification</p>
                 </div>
 
                 <Card>
                     <form onSubmit={onSubmit}>
                         <Input
-                            label="Project Title"
+                            label="Project / Repository Title"
                             type="text"
                             name="title"
                             value={title}
                             onChange={onChange}
                             required
-                            placeholder="e.g., AI Image Generator"
+                            placeholder="e.g., My Portfolio Website"
                         />
 
                         <div style={{ marginBottom: '1rem' }}>
@@ -66,7 +61,7 @@ const ProjectUpload = () => {
                                 value={description}
                                 onChange={onChange}
                                 required
-                                placeholder="Describe what your project does..."
+                                placeholder="A brief description of the technical work implemented..."
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem',
@@ -84,34 +79,14 @@ const ProjectUpload = () => {
                         </div>
 
                         <Input
-                            label="Tech Stack (comma separated)"
-                            type="text"
-                            name="techStack"
-                            value={techStack}
+                            label="GitHub Repository Link"
+                            type="url"
+                            name="githubLink"
+                            value={githubLink}
                             onChange={onChange}
-                            placeholder="React, Node.js, MongoDB, TensorFlow"
                             required
+                            placeholder="https://github.com/yourusername/reponame"
                         />
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <Input
-                                label="GitHub Repository"
-                                type="url"
-                                name="githubLink"
-                                value={githubLink}
-                                onChange={onChange}
-                                required
-                                placeholder="https://github.com/user/repo"
-                            />
-                            <Input
-                                label="Live Demo (Optional)"
-                                type="url"
-                                name="liveLink"
-                                value={liveLink}
-                                onChange={onChange}
-                                placeholder="https://my-demo.com"
-                            />
-                        </div>
 
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
                             <Button
@@ -123,7 +98,7 @@ const ProjectUpload = () => {
                                 Cancel
                             </Button>
                             <Button type="submit" variant="primary" style={{ flex: 2 }}>
-                                Submit Project
+                                Verify & Submit
                             </Button>
                         </div>
                     </form>

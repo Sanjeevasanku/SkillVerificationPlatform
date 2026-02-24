@@ -7,7 +7,7 @@ import useFetch from '../hooks/useFetch';
 
 const MyProjects = () => {
     const navigate = useNavigate();
-    const { data: projects, loading, error } = useFetch('/projects/my');
+    const { data: projects, loading, error } = useFetch('/repositories/my');
 
     if (loading) {
         return (
