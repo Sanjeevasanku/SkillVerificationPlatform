@@ -35,39 +35,78 @@ const ProjectCard = ({ project }) => {
             </p>
 
             <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Verified Skills</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    {project.skills && project.skills.length > 0 ? (
-                        project.skills.map((skill, i) => (
+                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
+                {project.skills && project.skills.length > 0 ? (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        justifyContent: 'space-around',
+                        height: '140px',
+                        padding: '10px 0',
+                        gap: '8px',
+                        background: 'rgba(0,0,0,0.02)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-color)',
+                        marginBottom: '1rem',
+                        paddingTop: '30px'
+                    }}>
+                        {project.skills.map((skill, i) => (
                             <div key={i} style={{
-                                background: 'rgba(5, 118, 66, 0.05)',
-                                border: '1px solid rgba(5, 118, 66, 0.15)',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '2px'
+                                alignItems: 'center',
+                                flex: 1,
+                                height: '100%',
+                                justifyContent: 'flex-end',
+                                position: 'relative'
                             }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--success-color)' }}>{skill.name}</span>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{(skill.confidenceScore * 100).toFixed(0)}%</span>
+                                <div
+                                    title={`${skill.name}: ${(skill.confidenceScore * 100).toFixed(0)}%`}
+                                    style={{
+                                        width: '100%',
+                                        maxWidth: '35px',
+                                        height: `${skill.confidenceScore * 100}%`,
+                                        backgroundColor: 'var(--brand-color)',
+                                        borderRadius: '4px 4px 0 0',
+                                        transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        cursor: 'pointer',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '-22px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        fontSize: '0.65rem',
+                                        fontWeight: 'bold',
+                                        color: 'var(--brand-color)'
+                                    }}>
+                                        {(skill.confidenceScore * 100).toFixed(0)}%
+                                    </span>
                                 </div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
-                                    {skill.evidence.join(', ')}
-                                </div>
+                                <span style={{
+                                    marginTop: '8px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textAlign: 'center',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    width: '100%'
+                                }}>
+                                    {skill.name}
+                                </span>
                             </div>
-                        ))
-                    ) : (
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>No deep skills detected yet.</p>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: '1.5rem' }}>No deep skills detected yet.</p>
+                )}
             </div>
 
-            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--success-color)', fontSize: '0.9rem' }}>●</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Verified</span>
-                </div>
+            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <a
                     href={project.githubLink}
                     target="_blank"
@@ -76,10 +115,13 @@ const ProjectCard = ({ project }) => {
                         textDecoration: 'none',
                         color: 'var(--brand-color)',
                         fontSize: '0.9rem',
-                        fontWeight: '600'
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
                     }}
                 >
-                    View on GitHub ↗
+                    View on GitHub <span>↗</span>
                 </a>
             </div>
         </Card>
