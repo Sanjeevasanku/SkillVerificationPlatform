@@ -60,6 +60,16 @@ const repositorySchema = new mongoose.Schema({
         }
     ],
 
+    testScore: {
+        type: Number,
+        min: 0,
+        max: 6
+    },
+
+    testTimeTaken: {
+        type: Number // seconds
+    },
+
     verificationStatus: {
         type: String,
         enum: ["verified", "rejected"]

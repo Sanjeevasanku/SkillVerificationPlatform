@@ -1,13 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 import Button from '../common/Button';
 
 const ProjectCard = ({ project }) => {
+    const navigate = useNavigate();
+
     const getContributionColor = (percent) => {
         if (percent >= 70) return 'var(--success-color)';
         if (percent >= 30) return '#eab308'; // Yellow/Gold
         return 'var(--error-color)';
     };
+
+    const hasSkills = project.skills && project.skills.length > 0;
+    const testTaken = project.testScore !== undefined && project.testScore !== null;
 
     return (
         <Card className="project-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -36,7 +42,7 @@ const ProjectCard = ({ project }) => {
 
             <div style={{ marginBottom: '1.5rem' }}>
                 <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
-                {project.skills && project.skills.length > 0 ? (
+                {hasSkills ? (
                     <div style={{
                         display: 'flex',
                         alignItems: 'flex-end',
@@ -106,7 +112,32 @@ const ProjectCard = ({ project }) => {
                 )}
             </div>
 
-            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* Test button or score badge */}
+                {testTaken ? (
+                    <span style={{
+                        padding: '4px 14px',
+                        borderRadius: '50px',
+                        fontSize: '0.85rem',
+                        fontWeight: '700',
+                        color: '#fff',
+                        backgroundColor: project.testScore >= 4 ? 'var(--success-color)' : project.testScore >= 2 ? '#eab308' : 'var(--error-color)',
+                    }}>
+                        Test: {project.testScore}/{project.testScore <= 4 ? 4 : 6}
+                        {project.testTimeTaken && ` • ${Math.floor(project.testTimeTaken / 60)}m${(project.testTimeTaken % 60).toString().padStart(2, '0')}s`}
+                    </span>
+                ) : hasSkills ? (
+                    <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={() => navigate(`/skill-test/${project._id}`)}
+                    >
+                        🧪 Take Skill Test
+                    </Button>
+                ) : (
+                    <span></span>
+                )}
+
                 <a
                     href={project.githubLink}
                     target="_blank"
