@@ -79,18 +79,30 @@ const Dashboard = () => {
 
                 <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
                     <Card title="Quick Stats">
-                        <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', textAlign: 'center' }}>
                             <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>
+                                <h3 style={{ fontSize: '1.8rem', color: 'var(--brand-color)', margin: 0 }}>
                                     {skillData.skills.length}
                                 </h3>
-                                <p>Detected Skills</p>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Skills</p>
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--success-color)', margin: 0 }}>
-                                    {skillData.categorySummary.length}
+                                <h3 style={{ fontSize: '1.8rem', color: 'var(--success-color)', margin: 0 }}>
+                                    {skillData.overallStats?.projectCount || 0}
                                 </h3>
-                                <p>Categories</p>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Projects</p>
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '1.8rem', color: '#818cf8', margin: 0 }}>
+                                    {Math.round((skillData.overallStats?.averageConsistency || 0) * 100)}%
+                                </h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Consistency</p>
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '1.8rem', color: '#22c55e', margin: 0 }}>
+                                    {Math.round((skillData.overallStats?.averageAuthenticity || 0) * 100)}%
+                                </h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Authenticity</p>
                             </div>
                         </div>
                     </Card>
