@@ -2,6 +2,9 @@ const Repository = require('../models/Repository');
 const parseGitHubUrl = require('../utils/parseGitHubUrl');
 const verificationService = require('../services/verificationService');
 const skillDetectionService = require('../services/skillDetectionService');
+const githubService = require('../services/githubService');
+const consistencyService = require('../services/consistencyService');
+const authenticityService = require('../services/authenticityService');
 const Student = require('../models/Student');
 
 /**
@@ -107,14 +110,37 @@ exports.createRepository = async (req, res) => {
             verificationStatus: 'verified'
         });
 
+        // 6.5 Calculate Consistency Score
+        try {
+            const commitDates = await githubService.fetchCommitDates(owner, repo);
+            const consistency = consistencyService.calculateCommitConsistency(commitDates);
+
+            newRepo.commitConsistencyScore = consistency.consistencyScore;
+            newRepo.firstCommitDate = consistency.firstCommitDate;
+            newRepo.lastCommitDate = consistency.lastCommitDate;
+            newRepo.activeWeeks = consistency.activeWeeks;
+        } catch (scoringError) {
+            console.error('Commit consistency calculation failed:', scoringError.message);
+            // We don't crash the flow, just log the error
+        }
+
         await newRepo.save();
 
         // 7. Trigger Skill Extraction (Async background process for immediate frontend response)
         // We don't 'await' this so the user is redirected immediately
         skillDetectionService.detectSkills(owner, repo).then(async (skills) => {
             newRepo.skills = skills;
+
+            // Calculate Authenticity Score after skills are extracted
+            try {
+                const authenticity = authenticityService.calculateProjectAuthenticity(newRepo);
+                newRepo.projectAuthenticityScore = authenticity;
+            } catch (authError) {
+                console.error('Project authenticity calculation failed:', authError.message);
+            }
+
             await newRepo.save();
-            console.log(`[SkillDetection] Background analysis complete for ${owner}/${repo}`);
+            console.log(`[SkillDetection] Background analysis and scoring complete for ${owner}/${repo}`);
         }).catch(extractError => {
             console.error('Background skill extraction failed:', extractError.message);
         });
@@ -147,5 +173,53 @@ exports.getMyRepositories = async (req, res) => {
     } catch (err) {
         console.error('Error in getMyRepositories:', err.message);
         res.status(500).json({ message: "Server error" });
+    }
+};
+
+/**
+ * @desc    Recalculate scores for a specific repository
+ * @route   PUT /api/repositories/:id/recalculate
+ * @access  Private (Student only)
+ */
+exports.recalculateScores = async (req, res) => {
+    try {
+        const repo = await Repository.findOne({ _id: req.params.id, student: req.user.id });
+        if (!repo) {
+            return res.status(404).json({ message: 'Repository not found' });
+        }
+
+        const { owner, repo: repoName } = require('../utils/parseGitHubUrl')(repo.githubLink);
+
+        // Recalculate consistency
+        try {
+            const commitDates = await githubService.fetchCommitDates(owner, repoName);
+            const consistency = consistencyService.calculateCommitConsistency(commitDates);
+            repo.commitConsistencyScore = consistency.consistencyScore;
+            repo.firstCommitDate = consistency.firstCommitDate;
+            repo.lastCommitDate = consistency.lastCommitDate;
+            repo.activeWeeks = consistency.activeWeeks;
+        } catch (err) {
+            console.error('Consistency recalc failed:', err.message);
+        }
+
+        // Recalculate authenticity (uses existing skills in DB)
+        try {
+            repo.projectAuthenticityScore = authenticityService.calculateProjectAuthenticity(repo);
+        } catch (err) {
+            console.error('Authenticity recalc failed:', err.message);
+        }
+
+        await repo.save();
+
+        res.json({
+            commitConsistencyScore: repo.commitConsistencyScore,
+            projectAuthenticityScore: repo.projectAuthenticityScore,
+            activeWeeks: repo.activeWeeks,
+            firstCommitDate: repo.firstCommitDate,
+            lastCommitDate: repo.lastCommitDate
+        });
+    } catch (err) {
+        console.error('Error in recalculateScores:', err.message);
+        res.status(500).json({ message: 'Server error' });
     }
 };

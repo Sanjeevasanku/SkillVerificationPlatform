@@ -158,6 +158,29 @@ const fetchTotalCommitCount = async (owner, repo) => {
 };
 
 /**
+ * Fetch commit dates for a repository
+ * @param {string} owner Repository owner
+ * @param {string} repo Repository name
+ * @returns {Promise<Array<Date>>} Array of commit dates
+ */
+const fetchCommitDates = async (owner, repo) => {
+    try {
+        const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
+            params: { per_page: 100 },
+            headers: {
+                Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                Accept: 'application/vnd.github.v3+json'
+            }
+        });
+
+        return response.data.map(commit => new Date(commit.commit.author.date));
+    } catch (err) {
+        console.error(`[GitHubService] Error fetching commit dates for ${owner}/${repo}:`, err.message);
+        return [];
+    }
+};
+
+/**
  * Fetch repository contents (files/folders) at a specific path
  * @param {string} owner Repository owner
  * @param {string} repo Repository name
@@ -231,6 +254,7 @@ module.exports = {
     fetchLanguages,
     fetchCommitsByAuthor,
     fetchTotalCommitCount,
+    fetchCommitDates,
     fetchRepoContents,
     fetchFileContent
 };
