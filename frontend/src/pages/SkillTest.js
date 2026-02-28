@@ -28,7 +28,8 @@ const formatTime = (seconds) => {
 };
 
 const SkillTest = () => {
-    const { repoId } = useParams();
+    const { skillName: rawSkillName } = useParams();
+    const skillName = decodeURIComponent(rawSkillName);
     const navigate = useNavigate();
 
     // State machine: 'loading' | 'round1' | 'evaluating' | 'round2' | 'results'
@@ -37,7 +38,6 @@ const SkillTest = () => {
     const [answers, setAnswers] = useState({});
     const [timer, setTimer] = useState(0);
     const [timerRunning, setTimerRunning] = useState(false);
-    const [repoTitle, setRepoTitle] = useState('');
     const [round1Score, setRound1Score] = useState(null);
     const [round1Evaluation, setRound1Evaluation] = useState(null);
     const [round2Evaluation, setRound2Evaluation] = useState(null);
@@ -63,9 +63,8 @@ const SkillTest = () => {
         try {
             setPhase('loading');
             setError(null);
-            const res = await api.post(`/repositories/${repoId}/test/start`);
+            const res = await api.post('/skills/test/start', { skillName });
             setQuestions(res.data.questions);
-            setRepoTitle(res.data.repoTitle);
             setAnswers({});
             setPhase('round1');
             setTimerRunning(true);
@@ -73,7 +72,7 @@ const SkillTest = () => {
             setError(err.response?.data?.message || 'Failed to start test');
             setPhase('error');
         }
-    }, [repoId]);
+    }, [skillName]);
 
     useEffect(() => {
         startTest();
@@ -98,6 +97,7 @@ const SkillTest = () => {
 
         try {
             const payload = {
+                skillName,
                 answers: questions.map(q => ({
                     id: q.id,
                     difficulty: q.difficulty,
@@ -109,7 +109,7 @@ const SkillTest = () => {
                 timeTaken: timer
             };
 
-            const res = await api.post(`/repositories/${repoId}/test/evaluate`, payload);
+            const res = await api.post('/skills/test/evaluate', payload);
 
             setRound1Score(res.data.round1Score);
             setRound1Evaluation(res.data.evaluation);
@@ -150,6 +150,7 @@ const SkillTest = () => {
 
         try {
             const payload = {
+                skillName,
                 answers: questions.map(q => ({
                     id: q.id,
                     difficulty: q.difficulty,
@@ -162,7 +163,7 @@ const SkillTest = () => {
                 round1Score
             };
 
-            const res = await api.post(`/repositories/${repoId}/test/final`, payload);
+            const res = await api.post('/skills/test/final', payload);
 
             setRound2Evaluation(res.data.evaluation);
             setFinalResult({
@@ -187,7 +188,7 @@ const SkillTest = () => {
             <Layout>
                 <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
                     <div className="loader"></div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Generating questions from your skills...</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>Generating questions for <strong>{skillName}</strong>...</p>
                 </div>
             </Layout>
         );
@@ -198,8 +199,8 @@ const SkillTest = () => {
             <Layout>
                 <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
                     <h2 style={{ color: 'var(--error-color)' }}>⚠️ {error}</h2>
-                    <Button variant="secondary" onClick={() => navigate('/my-projects')}>
-                        Back to My Projects
+                    <Button variant="secondary" onClick={() => navigate('/dashboard')}>
+                        Back to Dashboard
                     </Button>
                 </div>
             </Layout>
@@ -219,7 +220,6 @@ const SkillTest = () => {
     }
 
     if (phase === 'results') {
-        const passed = finalResult.maxScore === 6;
         const scorePercent = ((finalResult.totalScore / finalResult.maxScore) * 100).toFixed(0);
 
         return (
@@ -230,7 +230,7 @@ const SkillTest = () => {
                             {finalResult.totalScore >= 4 ? '🎉' : finalResult.totalScore >= 2 ? '👏' : '😬'}
                         </h1>
                         <h2 style={{ marginBottom: '0.5rem' }}>Test Complete</h2>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{repoTitle}</p>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{skillName}</p>
 
                         <div style={{
                             display: 'flex',
@@ -256,7 +256,7 @@ const SkillTest = () => {
                             </div>
                         </div>
 
-                        {passed && finalResult.round1Score !== undefined && (
+                        {finalResult.maxScore === 6 && finalResult.round1Score !== undefined && (
                             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                                 Round 1: {finalResult.round1Score}/4 • Round 2: {finalResult.round2Score}/2
                             </p>
@@ -297,10 +297,10 @@ const SkillTest = () => {
 
                         <Button
                             variant="primary"
-                            onClick={() => navigate('/my-projects')}
+                            onClick={() => navigate('/dashboard')}
                             style={{ marginTop: '2rem' }}
                         >
-                            Back to My Projects
+                            Back to Dashboard
                         </Button>
                     </Card>
                 </div>
@@ -333,7 +333,7 @@ const SkillTest = () => {
                             Skill Test {isRound2 && '— Bonus Round'}
                         </h1>
                         <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>
-                            {repoTitle} • Round {currentRound}/{isRound2 ? 2 : '?'}
+                            {skillName} • Round {currentRound}/{isRound2 ? 2 : '?'}
                         </p>
                     </div>
                     <div style={{
@@ -433,7 +433,7 @@ const SkillTest = () => {
                         variant="ghost"
                         onClick={() => {
                             if (window.confirm('Are you sure you want to quit? Your progress will be lost.')) {
-                                navigate('/my-projects');
+                                navigate('/dashboard');
                             }
                         }}
                     >
