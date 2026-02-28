@@ -14,13 +14,6 @@ router.post('/', auth, repositoryController.createRepository);
 router.get('/my', auth, repositoryController.getMyRepositories);
 
 /**
- * @route   PUT /api/repositories/:id/recalculate
- * @desc    Recalculate scores for a project
- * @access  Private
- */
-router.put('/:id/recalculate', auth, repositoryController.recalculateScores);
-
-/**
  * @route   POST /api/repositories/:id/test/start
  * @desc    Start skill test — generates round 1 questions
  * @access  Private

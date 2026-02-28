@@ -4,8 +4,6 @@ const verificationService = require('../services/verificationService');
 const skillDetectionService = require('../services/skillDetectionService');
 const Student = require('../models/Student');
 const githubService = require('../services/githubService');
-const consistencyService = require('../services/consistencyService');
-const authenticityService = require('../services/authenticityService');
 
 /**
  * @desc    Verify and create repository
@@ -110,25 +108,6 @@ exports.createRepository = async (req, res) => {
             verificationStatus: 'verified'
         });
 
-        // 6.5 Calculate Consistency Score
-        try {
-            const commitDates = await githubService.fetchCommitDates(owner, repo);
-            const consistency = consistencyService.calculateCommitConsistency(commitDates);
-
-            newRepo.commitConsistencyScore = consistency.consistencyScore;
-            newRepo.firstCommitDate = consistency.firstCommitDate;
-            newRepo.lastCommitDate = consistency.lastCommitDate;
-            newRepo.activeWeeks = consistency.activeWeeks;
-        } catch (scoringError) {
-            console.error('Commit consistency calculation failed:', scoringError.message);
-        }
-
-        // 6.6 Calculate Authenticity Score
-        newRepo.projectAuthenticityScore = authenticityService.calculateAuthenticityScore(
-            repoMetadata,
-            contributionPercentage
-        );
-
         await newRepo.save();
 
         // 7. Trigger Skill Extraction (Async background process for immediate frontend response)
@@ -169,58 +148,5 @@ exports.getMyRepositories = async (req, res) => {
     } catch (err) {
         console.error('Error in getMyRepositories:', err.message);
         res.status(500).json({ message: "Server error" });
-    }
-};
-/**
- * @desc    Recalculate scores for a project
- * @route   PUT /api/repositories/:id/recalculate
- * @access  Private (Student only)
- */
-exports.recalculateScores = async (req, res) => {
-    try {
-        const repo = await Repository.findOne({ _id: req.params.id, student: req.user.id });
-        if (!repo) {
-            return res.status(404).json({ message: 'Repository not found' });
-        }
-
-        const parsedUrl = parseGitHubUrl(repo.githubLink);
-        const { owner, repo: repoName } = parsedUrl;
-
-        // 1. Recalculate consistency
-        try {
-            const commitDates = await githubService.fetchCommitDates(owner, repoName);
-            const consistency = consistencyService.calculateCommitConsistency(commitDates);
-
-            repo.commitConsistencyScore = consistency.consistencyScore;
-            repo.firstCommitDate = consistency.firstCommitDate;
-            repo.lastCommitDate = consistency.lastCommitDate;
-            repo.activeWeeks = consistency.activeWeeks;
-        } catch (error) {
-            console.error('Recalculate consistency failed:', error.message);
-        }
-
-        // 2. Recalculate authenticity (using current stats)
-        const student = await Student.findById(req.user.id);
-        const verification = await verificationService.verifyRepository(student, owner, repoName);
-
-        repo.totalCommitCount = verification.totalCommitCount;
-        repo.commitCountByStudent = verification.commitCountByStudent;
-        repo.contributionPercentage = verification.contributionPercentage;
-
-        repo.projectAuthenticityScore = authenticityService.calculateAuthenticityScore(
-            verification.repoMetadata,
-            verification.contributionPercentage
-        );
-
-        await repo.save();
-
-        res.json({
-            commitConsistencyScore: repo.commitConsistencyScore,
-            projectAuthenticityScore: repo.projectAuthenticityScore,
-            contributionPercentage: repo.contributionPercentage
-        });
-    } catch (err) {
-        console.error('Error in recalculateScores:', err.message);
-        res.status(500).json({ message: "Server error during recalculation" });
     }
 };

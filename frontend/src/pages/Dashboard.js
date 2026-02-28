@@ -86,18 +86,6 @@ const Dashboard = () => {
                                 </h3>
                                 <p>Projects</p>
                             </div>
-                            <div>
-                                <h3 style={{ fontSize: '2rem', color: '#818cf8', margin: 0 }}>
-                                    {Math.round((skillData.overallStats?.averageConsistency || 0) * 100)}%
-                                </h3>
-                                <p>Consistency</p>
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--success-color)', margin: 0 }}>
-                                    {Math.round((skillData.overallStats?.averageAuthenticity || 0) * 100)}%
-                                </h3>
-                                <p>Authenticity</p>
-                            </div>
                         </div>
                     </Card>
 
