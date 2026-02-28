@@ -102,8 +102,11 @@ export const AuthProvider = ({ children }) => {
 
     // Login User
     const login = async (formData) => {
+        const { role, ...loginData } = formData;
+        const endpoint = role === 'hr' ? '/auth/hr/login' : '/auth/login';
+
         try {
-            const res = await api.post('/auth/login', formData);
+            const res = await api.post(endpoint, loginData);
 
             setAuthToken(res.data.token); // Set token in headers
 

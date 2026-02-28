@@ -6,9 +6,9 @@ import Layout from '../components/layout/Layout';
 import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { AlertDialog } from '../components/common/Dialog';
 
 const ProjectUpload = () => {
-    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -17,6 +17,10 @@ const ProjectUpload = () => {
         githubLink: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '' });
+
+    const showAlertDialog = (title, message) => setDialog({ isOpen: true, title, message });
+    const closeDialog = () => setDialog({ ...dialog, isOpen: false });
 
     const { title, description, githubLink } = formData;
 
@@ -31,7 +35,7 @@ const ProjectUpload = () => {
             navigate('/my-projects');
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.reason || err.response?.data?.message || 'Error verifying repository');
+            showAlertDialog('Verification Error', err.response?.data?.reason || err.response?.data?.message || 'Error verifying repository');
         } finally {
             setIsSubmitting(false);
         }
@@ -113,6 +117,13 @@ const ProjectUpload = () => {
                         </div>
                     </form>
                 </Card>
+
+                <AlertDialog
+                    isOpen={dialog.isOpen}
+                    title={dialog.title}
+                    message={dialog.message}
+                    onConfirm={closeDialog}
+                />
             </div>
         </Layout>
     );

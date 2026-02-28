@@ -25,6 +25,13 @@ router.get('/github/callback', authController.githubCallback);
 router.post('/login', authController.login);
 
 /**
+ * @route   POST api/auth/hr/login
+ * @desc    Authenticate HR & get token
+ * @access  Public
+ */
+router.post('/hr/login', authController.hrLogin);
+
+/**
  * @route   POST api/auth/register
  * @desc    Register a new student
  * @access  Public

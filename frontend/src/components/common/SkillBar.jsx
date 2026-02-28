@@ -40,47 +40,49 @@ const SkillBar = ({ name, confidence, level, testResult, onTestClick }) => {
                 </div>
 
                 {/* Test button or score badge */}
-                <div style={{ marginLeft: '0.75rem', flexShrink: 0 }}>
-                    {testResult ? (
-                        <span style={{
-                            padding: '3px 10px',
-                            borderRadius: '50px',
-                            fontSize: '0.75rem',
-                            fontWeight: '700',
-                            color: '#fff',
-                            backgroundColor: getScoreColor(testResult.score, testResult.maxScore),
-                            whiteSpace: 'nowrap'
-                        }}>
-                            ✓ {testResult.score}/{testResult.maxScore}
-                        </span>
-                    ) : (
-                        <button
-                            onClick={() => onTestClick && onTestClick(name)}
-                            style={{
-                                padding: '4px 12px',
+                {(testResult || onTestClick) && (
+                    <div style={{ marginLeft: '0.75rem', flexShrink: 0 }}>
+                        {testResult ? (
+                            <span style={{
+                                padding: '3px 10px',
                                 borderRadius: '50px',
-                                fontSize: '0.72rem',
+                                fontSize: '0.75rem',
                                 fontWeight: '700',
-                                color: 'var(--brand-color)',
-                                backgroundColor: 'rgba(10, 102, 194, 0.08)',
-                                border: '1px solid rgba(10, 102, 194, 0.2)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
+                                color: '#fff',
+                                backgroundColor: getScoreColor(testResult.score, testResult.maxScore),
                                 whiteSpace: 'nowrap'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = 'rgba(10, 102, 194, 0.15)';
-                                e.target.style.borderColor = 'rgba(10, 102, 194, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = 'rgba(10, 102, 194, 0.08)';
-                                e.target.style.borderColor = 'rgba(10, 102, 194, 0.2)';
-                            }}
-                        >
-                            🧪 Test
-                        </button>
-                    )}
-                </div>
+                            }}>
+                                ✓ {testResult.score}/{testResult.maxScore}
+                            </span>
+                        ) : (
+                            <button
+                                onClick={() => onTestClick && onTestClick(name)}
+                                style={{
+                                    padding: '4px 12px',
+                                    borderRadius: '50px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: '700',
+                                    color: 'var(--brand-color)',
+                                    backgroundColor: 'rgba(10, 102, 194, 0.08)',
+                                    border: '1px solid rgba(10, 102, 194, 0.2)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    whiteSpace: 'nowrap'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(10, 102, 194, 0.15)';
+                                    e.target.style.borderColor = 'rgba(10, 102, 194, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(10, 102, 194, 0.08)';
+                                    e.target.style.borderColor = 'rgba(10, 102, 194, 0.2)';
+                                }}
+                            >
+                                🧪 Test
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
             <div style={{
                 height: '8px',

@@ -32,28 +32,44 @@ const Navbar = () => {
                 {user ? (
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <Link
-                                to="/dashboard"
-                                style={{
-                                    color: isActive('/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                    borderBottom: isActive('/dashboard') ? '2px solid var(--text-primary)' : 'none',
-                                    paddingBottom: '4px',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                to="/my-projects"
-                                style={{
-                                    color: isActive('/my-projects') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                    borderBottom: isActive('/my-projects') ? '2px solid var(--text-primary)' : 'none',
-                                    paddingBottom: '4px',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                My Projects
-                            </Link>
+                            {user.role === 'hr' ? (
+                                <Link
+                                    to="/hr/dashboard"
+                                    style={{
+                                        color: isActive('/hr/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                        borderBottom: isActive('/hr/dashboard') ? '2px solid var(--text-primary)' : 'none',
+                                        paddingBottom: '4px',
+                                        textDecoration: 'none'
+                                    }}
+                                >
+                                    HR Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/dashboard"
+                                        style={{
+                                            color: isActive('/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                            borderBottom: isActive('/dashboard') ? '2px solid var(--text-primary)' : 'none',
+                                            paddingBottom: '4px',
+                                            textDecoration: 'none'
+                                        }}
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link
+                                        to="/my-projects"
+                                        style={{
+                                            color: isActive('/my-projects') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                            borderBottom: isActive('/my-projects') ? '2px solid var(--text-primary)' : 'none',
+                                            paddingBottom: '4px',
+                                            textDecoration: 'none'
+                                        }}
+                                    >
+                                        My Projects
+                                    </Link>
+                                </>
+                            )}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>

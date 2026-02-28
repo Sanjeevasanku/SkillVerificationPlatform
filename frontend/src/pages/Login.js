@@ -6,16 +6,17 @@ import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
 const Login = () => {
-    const { login, loginWithToken, isAuthenticated, error, clearErrors } = useContext(AuthContext);
+    const { login, loginWithToken, isAuthenticated, user, error, clearErrors } = useContext(AuthContext);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        selectedRole: 'student' // Default to student
     });
 
-    const { email, password } = formData;
+    const { email, password, selectedRole } = formData;
 
     useEffect(() => {
         const token = searchParams.get('token');
@@ -23,8 +24,12 @@ const Login = () => {
             loginWithToken(token);
         }
 
-        if (isAuthenticated) {
-            navigate('/dashboard');
+        if (isAuthenticated && user) {
+            if (user.role === 'hr') {
+                navigate('/hr/dashboard');
+            } else {
+                navigate('/dashboard');
+            }
         }
         if (error) {
             const timer = setTimeout(() => {
@@ -32,13 +37,13 @@ const Login = () => {
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated, navigate, error, searchParams, loginWithToken, clearErrors]);
+    }, [isAuthenticated, user, navigate, error, searchParams, loginWithToken, clearErrors]);
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = e => {
         e.preventDefault();
-        login({ email, password });
+        login({ email, password, role: selectedRole });
     };
 
     const handleGithubLogin = () => {
@@ -59,8 +64,27 @@ const Login = () => {
                 </Button>
             </div>
 
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem' }}>
+                <Button
+                    type="button"
+                    variant={selectedRole === 'student' ? 'primary' : 'secondary'}
+                    onClick={() => setFormData({ ...formData, selectedRole: 'student' })}
+                    style={{ flex: 1 }}
+                >
+                    Student
+                </Button>
+                <Button
+                    type="button"
+                    variant={selectedRole === 'hr' ? 'primary' : 'secondary'}
+                    onClick={() => setFormData({ ...formData, selectedRole: 'hr' })}
+                    style={{ flex: 1 }}
+                >
+                    HR
+                </Button>
+            </div>
+
             <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.8rem', position: 'relative' }}>
-                <span style={{ background: 'var(--bg-primary)', padding: '0 10px', position: 'relative', zIndex: 1 }}>or sign in with email</span>
+                <span style={{ background: 'var(--bg-primary)', padding: '0 10px', position: 'relative', zIndex: 1 }}>or sign in with credentials</span>
                 <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderBottom: '1px solid var(--border-color)', zIndex: 0 }}></div>
             </div>
 

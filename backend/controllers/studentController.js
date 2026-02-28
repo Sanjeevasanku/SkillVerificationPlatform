@@ -1,4 +1,5 @@
 const { generateStudentSkillProfile } = require('../services/studentSkillService');
+const Student = require('../models/Student');
 
 /**
  * Controller to handle student skill profile requests
@@ -20,6 +21,39 @@ const getSkillProfile = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Get student profile by ID
+ * @route   GET /api/students/:id
+ * @access  Private (HR/Admin)
+ */
+const getStudentProfileById = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id).select('-githubAccessToken');
+        if (!student) {
+            return res.status(404).json({ msg: 'Student not found' });
+        }
+
+        const skillProfile = await generateStudentSkillProfile(student._id);
+
+        res.json({
+            student: {
+                id: student._id,
+                fullName: student.fullName,
+                email: student.email,
+                college: student.college,
+                branch: student.branch,
+                graduationYear: student.graduationYear,
+                githubUsername: student.githubUsername
+            },
+            ...skillProfile
+        });
+    } catch (err) {
+        console.error('Error in getStudentProfileById:', err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
 module.exports = {
-    getSkillProfile
+    getSkillProfile,
+    getStudentProfileById
 };

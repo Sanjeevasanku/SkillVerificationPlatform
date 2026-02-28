@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const repositoryController = require('../controllers/repositoryController');
 const auth = require('../middleware/authMiddleware');
+const studentMiddleware = require('../middleware/studentMiddleware');
 
 /**
  * @route   POST /api/repositories
  * @desc    Verify and submit a new repository
- * @access  Private
+ * @access  Private (Student only)
  */
-router.post('/', auth, repositoryController.createRepository);
+router.post('/', [auth, studentMiddleware], repositoryController.createRepository);
 
 router.get('/my', auth, repositoryController.getMyRepositories);
 

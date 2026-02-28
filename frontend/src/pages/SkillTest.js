@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import api from '../lib/api';
+import { ConfirmDialog } from '../components/common/Dialog';
 
 const difficultyColors = {
     easy: '#057642',
@@ -43,6 +44,7 @@ const SkillTest = () => {
     const [round2Evaluation, setRound2Evaluation] = useState(null);
     const [finalResult, setFinalResult] = useState(null);
     const [error, setError] = useState(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const timerRef = useRef(null);
 
@@ -431,11 +433,7 @@ const SkillTest = () => {
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '3rem' }}>
                     <Button
                         variant="ghost"
-                        onClick={() => {
-                            if (window.confirm('Are you sure you want to quit? Your progress will be lost.')) {
-                                navigate('/dashboard');
-                            }
-                        }}
+                        onClick={() => setIsConfirmOpen(true)}
                     >
                         Quit Test
                     </Button>
@@ -448,6 +446,16 @@ const SkillTest = () => {
                     </Button>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={isConfirmOpen}
+                title="Quit Test"
+                message="Are you sure you want to quit? Your progress in this test session will be lost."
+                confirmText="Quit"
+                variant="danger"
+                onConfirm={() => navigate('/dashboard')}
+                onCancel={() => setIsConfirmOpen(false)}
+            />
         </Layout>
     );
 };

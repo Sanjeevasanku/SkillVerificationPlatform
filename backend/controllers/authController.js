@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const HR = require('../models/HR');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const githubService = require('../services/githubService');
@@ -211,18 +212,73 @@ exports.registerStudent = async (req, res) => {
     }
 };
 
-// @desc    Get current logged in student
+// @desc    Get current logged in user (Student or HR)
 // @route   GET /api/auth/me
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
-        const student = await Student.findById(req.user.id).select('-githubAccessToken');
-        if (!student) {
-            return res.status(404).json({ msg: 'Student not found' });
+        let user;
+        if (req.user.role === 'hr') {
+            user = await HR.findById(req.user.id);
+        } else {
+            user = await Student.findById(req.user.id).select('-githubAccessToken');
         }
-        res.json(student);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.json(user);
     } catch (err) {
         console.error('Error in getMe:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// @desc    Authenticate HR & get token
+// @route   POST /api/auth/hr/login
+// @access  Public
+exports.hrLogin = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        let hrUser = await HR.findOne({ email }).select('+password');
+
+        if (!hrUser) {
+            return res.status(400).json({ msg: 'Invalid Credentials' });
+        }
+
+        const isMatch = await hrUser.matchPassword(password);
+
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Invalid Credentials' });
+        }
+
+        const payload = {
+            user: {
+                id: hrUser._id,
+                role: hrUser.role // 'hr'
+            }
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' },
+            (err, token) => {
+                if (err) throw err;
+                res.json({
+                    token,
+                    user: {
+                        id: hrUser._id,
+                        fullName: hrUser.fullName,
+                        email: hrUser.email,
+                        role: hrUser.role
+                    }
+                });
+            }
+        );
+    } catch (err) {
+        console.error('Error in HR login:', err.message);
         res.status(500).send('Server error');
     }
 };
