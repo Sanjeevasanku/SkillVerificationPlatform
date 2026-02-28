@@ -1,11 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 import Button from '../common/Button';
 
 const ProjectCard = ({ project }) => {
-    const navigate = useNavigate();
-
     const getContributionColor = (percent) => {
         if (percent >= 70) return 'var(--success-color)';
         if (percent >= 30) return '#eab308';
@@ -13,7 +10,6 @@ const ProjectCard = ({ project }) => {
     };
 
     const hasSkills = project.skills && project.skills.length > 0;
-    const testTaken = project.testScore !== undefined && project.testScore !== null;
 
     return (
         <Card className="project-card" style={{
@@ -99,30 +95,7 @@ const ProjectCard = ({ project }) => {
                 )}
             </div>
 
-            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {testTaken ? (
-                    <span style={{
-                        padding: '4px 14px',
-                        borderRadius: '50px',
-                        fontSize: '0.85rem',
-                        fontWeight: '700',
-                        color: '#fff',
-                        backgroundColor: project.testScore >= 4 ? 'var(--success-color)' : project.testScore >= 2 ? '#eab308' : 'var(--error-color)',
-                    }}>
-                        Test: {project.testScore}/{project.testScore <= 4 ? 4 : 6}
-                    </span>
-                ) : hasSkills ? (
-                    <Button
-                        variant="secondary"
-                        size="small"
-                        onClick={() => navigate(`/skill-test/${project._id}`)}
-                    >
-                        🧪 Take Skill Test
-                    </Button>
-                ) : (
-                    <span></span>
-                )}
-
+            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <a
                     href={project.githubLink}
                     target="_blank"

@@ -1,4 +1,5 @@
 const Repository = require('../models/Repository');
+const Student = require('../models/Student');
 
 /**
  * Generates a dynamic skill profile for a student by aggregating verified repository data.
@@ -6,6 +7,13 @@ const Repository = require('../models/Repository');
  * @returns {Promise<Object>} The aggregated skill profile.
  */
 async function generateStudentSkillProfile(studentId) {
+    // Fetch student to get test scores
+    const student = await Student.findById(studentId).lean();
+    const testScoresArray = student?.skillTestScores || [];
+    // Build lookup by skillName
+    const testScores = {};
+    testScoresArray.forEach(t => { testScores[t.skillName] = t; });
+
     // STEP 1 – Fetch Verified Repositories
     const repos = await Repository.find({
         student: studentId,
@@ -68,11 +76,19 @@ async function generateStudentSkillProfile(studentId) {
             level = 'Beginner';
         }
 
+        const testResult = testScores[skillName] || null;
+
         skillList.push({
             name: skillName,
             category: data.category,
             confidence: finalConfidence,
-            level: level
+            level: level,
+            testResult: testResult ? {
+                score: testResult.score,
+                maxScore: testResult.maxScore,
+                timeTaken: testResult.timeTaken,
+                takenAt: testResult.takenAt
+            } : null
         });
     }
 

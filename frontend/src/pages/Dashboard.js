@@ -74,6 +74,7 @@ const Dashboard = () => {
                         skills={skillData.skills}
                         categorySummary={skillData.categorySummary}
                         loading={loadingSkills}
+                        onTestClick={(skillName) => navigate(`/skill-test/${encodeURIComponent(skillName)}`)}
                     />
                 </div>
 
