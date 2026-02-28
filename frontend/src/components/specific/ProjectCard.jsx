@@ -1,50 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
-
-const ScoreRing = ({ score, label, color }) => {
-    const pct = Math.round((score || 0) * 100);
-    const radius = 22;
-    const circumference = 2 * Math.PI * radius;
-    const dashOffset = circumference - (pct / 100) * circumference;
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-            <div style={{ position: 'relative', width: '60px', height: '60px' }}>
-                <svg width="60" height="60" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="30" cy="30" r={radius} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="5" />
-                    <circle
-                        cx="30" cy="30" r={radius}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="5"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={dashOffset}
-                        strokeLinecap="round"
-                        style={{ transition: 'stroke-dashoffset 1s ease-out' }}
-                    />
-                </svg>
-                <span style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    fontSize: '0.7rem', fontWeight: '800', color
-                }}>
-                    {pct}%
-                </span>
-            </div>
-            <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', fontWeight: '600' }}>
-                {label}
-            </span>
-        </div>
-    );
-};
-
-const getScoreLabel = (score) => {
-    if (score >= 0.75) return { text: 'Excellent', color: '#22c55e' };
-    if (score >= 0.50) return { text: 'Good', color: '#eab308' };
-    if (score >= 0.25) return { text: 'Fair', color: '#f97316' };
-    return { text: 'Low', color: '#ef4444' };
-};
+import Button from '../common/Button';
 
 const ProjectCard = ({ project }) => {
     const navigate = useNavigate();
