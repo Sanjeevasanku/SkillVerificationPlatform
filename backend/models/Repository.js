@@ -70,20 +70,6 @@ const repositorySchema = new mongoose.Schema({
         type: Number // seconds
     },
 
-    commitConsistencyScore: {
-        type: Number,
-        default: 0
-    },
-
-    projectAuthenticityScore: {
-        type: Number,
-        default: 0
-    },
-
-    firstCommitDate: Date,
-    lastCommitDate: Date,
-    activeWeeks: Number,
-
     verificationStatus: {
         type: String,
         enum: ["verified", "rejected"]
