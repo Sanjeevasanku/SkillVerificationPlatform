@@ -82,15 +82,21 @@ const Dashboard = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
                             <div>
                                 <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>
-                                    {skillData.skills.length}
+                                    {skillData.overallStats?.projectCount || 0}
                                 </h3>
-                                <p>Detected Skills</p>
+                                <p>Projects</p>
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '2rem', color: '#818cf8', margin: 0 }}>
+                                    {Math.round((skillData.overallStats?.averageConsistency || 0) * 100)}%
+                                </h3>
+                                <p>Consistency</p>
                             </div>
                             <div>
                                 <h3 style={{ fontSize: '2rem', color: 'var(--success-color)', margin: 0 }}>
-                                    {skillData.categorySummary.length}
+                                    {Math.round((skillData.overallStats?.averageAuthenticity || 0) * 100)}%
                                 </h3>
-                                <p>Categories</p>
+                                <p>Authenticity</p>
                             </div>
                         </div>
                     </Card>
