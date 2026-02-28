@@ -4,10 +4,26 @@ import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
 import ProjectCard from '../components/specific/ProjectCard';
 import useFetch from '../hooks/useFetch';
+import api from '../lib/api';
 
 const MyProjects = () => {
     const navigate = useNavigate();
-    const { data: projects, loading, error } = useFetch('/repositories/my');
+    const { data: projects, loading, error, setData } = useFetch('/repositories/my');
+
+    const handleRefreshScores = async (projectId) => {
+        try {
+            const res = await api.put(`/repositories/${projectId}/recalculate`);
+            const updatedProject = res.data;
+
+            // Update the local state with the new scores
+            setData(prevProjects => prevProjects.map(proj =>
+                proj._id === projectId ? { ...proj, ...updatedProject } : proj
+            ));
+        } catch (err) {
+            console.error('Error refreshing scores:', err);
+            alert('Failed to refresh scores. Please try again.');
+        }
+    };
 
     if (loading) {
         return (
@@ -48,7 +64,11 @@ const MyProjects = () => {
             }}>
                 {projects && projects.length > 0 ? (
                     projects.map(project => (
-                        <ProjectCard key={project._id} project={project} />
+                        <ProjectCard
+                            key={project._id}
+                            project={project}
+                            onRefresh={handleRefreshScores}
+                        />
                     ))
                 ) : (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>

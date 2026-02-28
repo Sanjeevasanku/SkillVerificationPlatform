@@ -10,7 +10,7 @@ async function generateStudentSkillProfile(studentId) {
     const repos = await Repository.find({
         student: studentId,
         verificationStatus: 'verified'
-    }).select('skills contributionPercentage').lean();
+    }).select('skills contributionPercentage commitConsistencyScore projectAuthenticityScore').lean();
 
     if (!repos || repos.length === 0) {
         return {
@@ -97,9 +97,23 @@ async function generateStudentSkillProfile(studentId) {
         score: Math.round((data.totalConfidence / data.count) * 100) / 100
     }));
 
+    // STEP 7 – Calculate Overall Aggregate Stats
+    const verifiedRepos = repos.filter(r => r.commitConsistencyScore !== undefined);
+    const projectCount = verifiedRepos.length;
+
+    const totalConsistency = verifiedRepos.reduce((sum, r) => sum + (r.commitConsistencyScore || 0), 0);
+    const totalAuthenticity = verifiedRepos.reduce((sum, r) => sum + (r.projectAuthenticityScore || 0), 0);
+
+    const overallStats = {
+        averageConsistency: projectCount > 0 ? Math.round((totalConsistency / projectCount) * 100) / 100 : 0,
+        averageAuthenticity: projectCount > 0 ? Math.round((totalAuthenticity / projectCount) * 100) / 100 : 0,
+        projectCount
+    };
+
     return {
         skills: skillList,
-        categorySummary: categorySummary
+        categorySummary: categorySummary,
+        overallStats
     };
 }
 

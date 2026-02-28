@@ -11,12 +11,14 @@ const auth = require('../middleware/authMiddleware');
  */
 router.post('/', auth, repositoryController.createRepository);
 
+router.get('/my', auth, repositoryController.getMyRepositories);
+
 /**
- * @route   GET /api/repositories/my
- * @desc    Get student's verified repositories
+ * @route   PUT /api/repositories/:id/recalculate
+ * @desc    Recalculate scores for a project
  * @access  Private
  */
-router.get('/my', auth, repositoryController.getMyRepositories);
+router.put('/:id/recalculate', auth, repositoryController.recalculateScores);
 
 /**
  * @route   POST /api/repositories/:id/test/start
