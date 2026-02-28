@@ -3,22 +3,18 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
-<<<<<<< Updated upstream
+
 import { AlertDialog } from '../components/common/Dialog';
-=======
->>>>>>> Stashed changes
+
 
 const RoleDetails = () => {
     const { roleId } = useParams();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-<<<<<<< Updated upstream
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '' });
 
     const showAlertDialog = (title, message) => setDialog({ isOpen: true, title, message });
     const closeDialog = () => setDialog({ ...dialog, isOpen: false });
-=======
->>>>>>> Stashed changes
 
     useEffect(() => {
         const fetchRoleDetails = async () => {
@@ -95,13 +91,8 @@ const RoleDetails = () => {
                                                     student.label === 'Moderately Ready' ? '#ffa500' :
                                                         '#ff0000',
                                             border: `1px solid ${student.label === 'Highly Ready' ? '#00ff0033' :
-<<<<<<< Updated upstream
                                                 student.label === 'Moderately Ready' ? '#ffa50033' :
                                                     '#ff000033'
-=======
-                                                    student.label === 'Moderately Ready' ? '#ffa50033' :
-                                                        '#ff000033'
->>>>>>> Stashed changes
                                                 }`
                                         }}>
                                             {student.label}
@@ -126,15 +117,10 @@ const RoleDetails = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '10px' }}>
-<<<<<<< Updated upstream
                                     <Link to={`/hr/students/${student.studentId}`}>
                                         <Button variant="secondary">Profile</Button>
                                     </Link>
                                     <Button variant="primary" onClick={() => showAlertDialog('Hire Candidate', 'Contact request sent to ' + student.name)}>Hire</Button>
-=======
-                                    <Button variant="secondary" onClick={() => alert('View Profile functionality coming soon!')}>Profile</Button>
-                                    <Button variant="primary" onClick={() => alert('Contacting ' + student.name)}>Hire</Button>
->>>>>>> Stashed changes
                                 </div>
                             </div>
                         ))
@@ -142,7 +128,6 @@ const RoleDetails = () => {
                         <p>No candidates found matching this role criteria.</p>
                     )}
                 </div>
-<<<<<<< Updated upstream
 
                 <AlertDialog
                     isOpen={dialog.isOpen}
@@ -150,11 +135,10 @@ const RoleDetails = () => {
                     message={dialog.message}
                     onConfirm={closeDialog}
                 />
-=======
->>>>>>> Stashed changes
             </div>
         </Layout>
     );
 };
 
 export default RoleDetails;
+

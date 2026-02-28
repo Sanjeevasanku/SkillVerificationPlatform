@@ -121,7 +121,7 @@ exports.detectSkills = async (owner, repo) => {
             }
         });
 
-        console.log(`✅ Skill detection complete. Found ${finalSkills.length} skills.`);
+        console.log(` Skill detection complete. Found ${finalSkills.length} skills.`);
         return finalSkills;
 
     } catch (err) {

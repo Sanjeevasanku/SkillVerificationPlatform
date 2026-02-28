@@ -87,7 +87,6 @@ exports.getRoleWithReadiness = async (req, res) => {
         res.status(500).json({ message: 'Server error', reason: err.message });
     }
 };
-<<<<<<< Updated upstream
 
 /**
  * @desc    Delete a role
@@ -141,5 +140,3 @@ exports.searchStudents = async (req, res) => {
         res.status(500).json({ message: 'Server error', reason: err.message });
     }
 };
-=======
->>>>>>> Stashed changes
