@@ -51,14 +51,7 @@ const repositorySchema = new mongoose.Schema({
     commitCountByStudent: Number,
     contributionPercentage: Number,
 
-    skills: [
-        {
-            name: { type: String, required: true },
-            category: { type: String, required: true },
-            confidenceScore: { type: Number, required: true, min: 0, max: 1 },
-            evidence: [String]
-        }
-    ],
+    skills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
 
     testScore: {
         type: Number,
