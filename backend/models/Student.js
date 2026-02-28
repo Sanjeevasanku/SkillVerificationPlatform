@@ -80,6 +80,15 @@ const StudentSchema = new mongoose.Schema({
         default: true
     },
 
+    // Per-skill test scores stored as array (avoids Mongoose Map dot-in-key issues)
+    skillTestScores: [{
+        skillName: { type: String, required: true },
+        score: { type: Number, required: true },
+        maxScore: { type: Number, required: true },
+        timeTaken: { type: Number },
+        takenAt: { type: Date, default: Date.now }
+    }],
+
 }, {
     timestamps: true
 });

@@ -7,7 +7,6 @@ const githubService = require('../services/githubService');
 const consistencyService = require('../services/consistencyService');
 const authenticityService = require('../services/authenticityService');
 const Student = require('../models/Student');
-const githubService = require('../services/githubService');
 
 /**
  * @desc    Verify and create repository
