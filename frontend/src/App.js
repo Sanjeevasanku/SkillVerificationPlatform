@@ -14,7 +14,10 @@ const SkillTest = lazy(() => import('./pages/SkillTest'));
 const HRDashboard = lazy(() => import('./pages/HRDashboard'));
 const CreateRole = lazy(() => import('./pages/CreateRole'));
 const RoleDetails = lazy(() => import('./pages/RoleDetails'));
+<<<<<<< Updated upstream
 const StudentProfileView = lazy(() => import('./pages/StudentProfileView'));
+=======
+>>>>>>> Stashed changes
 
 const LoadingFallback = () => (
   <div style={{
@@ -37,6 +40,16 @@ const App = () => {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+<<<<<<< Updated upstream
+=======
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/upload-project" element={<ProjectUpload />} />
+            <Route path="/my-projects" element={<MyProjects />} />
+            <Route path="/skill-test/:repoId" element={<SkillTest />} />
+            <Route path="/hr/dashboard" element={<HRDashboard />} />
+            <Route path="/hr/create-role" element={<CreateRole />} />
+            <Route path="/hr/roles/:roleId" element={<RoleDetails />} />
+>>>>>>> Stashed changes
             <Route path="/" element={<Login />} />
 
             {/* Student Private Routes */}

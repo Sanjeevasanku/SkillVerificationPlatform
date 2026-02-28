@@ -4,7 +4,10 @@ import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< Updated upstream
 import { AlertDialog } from '../components/common/Dialog';
+=======
+>>>>>>> Stashed changes
 
 const CreateRole = () => {
     const navigate = useNavigate();
@@ -14,10 +17,13 @@ const CreateRole = () => {
         requiredSkills: [{ skillName: '', weight: 1 }],
         optionalSkills: [{ skillName: '', weight: 0.5 }]
     });
+<<<<<<< Updated upstream
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '' });
 
     const showAlertDialog = (title, message) => setDialog({ isOpen: true, title, message });
     const closeDialog = () => setDialog({ ...dialog, isOpen: false });
+=======
+>>>>>>> Stashed changes
 
     const { title, description, requiredSkills, optionalSkills } = formData;
 
@@ -49,7 +55,11 @@ const CreateRole = () => {
             navigate('/hr/dashboard');
         } catch (err) {
             console.error('Error creating role:', err);
+<<<<<<< Updated upstream
             showAlertDialog('Error', err.response?.data?.reason || 'Failed to create role');
+=======
+            alert(err.response?.data?.reason || 'Failed to create role');
+>>>>>>> Stashed changes
         }
     };
 
@@ -154,6 +164,7 @@ const CreateRole = () => {
                         <Button type="button" variant="secondary" onClick={() => navigate('/hr/dashboard')} style={{ flex: 1 }}>Cancel</Button>
                     </div>
                 </form>
+<<<<<<< Updated upstream
 
                 <AlertDialog
                     isOpen={dialog.isOpen}
@@ -161,6 +172,8 @@ const CreateRole = () => {
                     message={dialog.message}
                     onConfirm={closeDialog}
                 />
+=======
+>>>>>>> Stashed changes
             </div>
         </Layout>
     );
