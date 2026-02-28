@@ -34,7 +34,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/upload-project" element={<ProjectUpload />} />
             <Route path="/my-projects" element={<MyProjects />} />
-            <Route path="/skill-test/:repoId" element={<SkillTest />} />
+            <Route path="/skill-test/:skillName" element={<SkillTest />} />
             <Route path="/" element={<Login />} />
           </Routes>
         </Suspense>

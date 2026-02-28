@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../common/Card';
 import SkillBar from '../common/SkillBar';
 
-const SkillProfile = ({ skills, categorySummary, loading }) => {
+const SkillProfile = ({ skills, categorySummary, loading, onTestClick }) => {
     if (loading) {
         return (
             <Card title="Skill Profile">
@@ -33,6 +33,8 @@ const SkillProfile = ({ skills, categorySummary, loading }) => {
                             name={skill.name}
                             confidence={skill.confidence}
                             level={skill.level}
+                            testResult={skill.testResult}
+                            onTestClick={onTestClick}
                         />
                     ))}
                 </div>
