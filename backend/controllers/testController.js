@@ -8,7 +8,7 @@ const groqService = require('../services/groqService');
  */
 exports.startTest = async (req, res) => {
     try {
-        const repo = await Repository.findById(req.params.id);
+        const repo = await Repository.findById(req.params.id).populate('skills');
 
         if (!repo) {
             return res.status(404).json({ message: 'Repository not found' });
@@ -72,7 +72,7 @@ exports.evaluateRound1 = async (req, res) => {
             });
         }
 
-        const repo = await Repository.findById(req.params.id);
+        const repo = await Repository.findById(req.params.id).populate('skills');
 
         if (!repo) {
             return res.status(404).json({ message: 'Repository not found' });

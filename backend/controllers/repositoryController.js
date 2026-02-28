@@ -1,4 +1,5 @@
 const Repository = require('../models/Repository');
+const Skill = require('../models/Skill');
 const parseGitHubUrl = require('../utils/parseGitHubUrl');
 const verificationService = require('../services/verificationService');
 const skillDetectionService = require('../services/skillDetectionService');
@@ -112,10 +113,27 @@ exports.createRepository = async (req, res) => {
 
         // 7. Trigger Skill Extraction (Async background process for immediate frontend response)
         // We don't 'await' this so the user is redirected immediately
-        skillDetectionService.detectSkills(owner, repo).then(async (skills) => {
-            newRepo.skills = skills;
+        skillDetectionService.detectSkills(owner, repo).then(async (detectedSkills) => {
+            // Upsert each skill into the Skill collection (keyed by student + name)
+            const skillIds = await Promise.all(
+                detectedSkills.map(skill =>
+                    Skill.findOneAndUpdate(
+                        { student: student._id, name: skill.name },
+                        {
+                            $set: {
+                                category: skill.category,
+                                confidenceScore: skill.confidenceScore,
+                                evidence: skill.evidence
+                            }
+                        },
+                        { upsert: true, new: true, setDefaultsOnInsert: true }
+                    ).then(doc => doc._id)
+                )
+            );
+
+            newRepo.skills = skillIds;
             await newRepo.save();
-            console.log(`[SkillDetection] Background analysis complete for ${owner}/${repo}`);
+            console.log(`[SkillDetection] Background analysis complete for ${owner}/${repo}. Saved ${skillIds.length} skills.`);
         }).catch(extractError => {
             console.error('Background skill extraction failed:', extractError.message);
         });
@@ -142,7 +160,8 @@ exports.createRepository = async (req, res) => {
 exports.getMyRepositories = async (req, res) => {
     try {
         const repositories = await Repository.find({ student: req.user.id })
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .populate('skills');
 
         res.json(repositories);
     } catch (err) {
