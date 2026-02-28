@@ -9,6 +9,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ProjectUpload = lazy(() => import('./pages/ProjectUpload'));
 const MyProjects = lazy(() => import('./pages/MyProjects'));
+const SkillTest = lazy(() => import('./pages/SkillTest'));
 
 const LoadingFallback = () => (
   <div style={{
@@ -33,6 +34,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/upload-project" element={<ProjectUpload />} />
             <Route path="/my-projects" element={<MyProjects />} />
+            <Route path="/skill-test/:repoId" element={<SkillTest />} />
             <Route path="/" element={<Login />} />
           </Routes>
         </Suspense>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../common/Card';
 
 const ScoreRing = ({ score, label, color }) => {
@@ -46,23 +47,28 @@ const getScoreLabel = (score) => {
 };
 
 const ProjectCard = ({ project }) => {
+    const navigate = useNavigate();
+
     const getContributionColor = (percent) => {
-        if (percent >= 70) return '#22c55e';
+        if (percent >= 70) return 'var(--success-color)';
         if (percent >= 30) return '#eab308';
-        return '#ef4444';
+        return 'var(--error-color)';
     };
 
-    const consistencyLabel = getScoreLabel(project.commitConsistencyScore || 0);
-    const authenticityLabel = getScoreLabel(project.projectAuthenticityScore || 0);
-    const avgScore = ((project.commitConsistencyScore || 0) + (project.projectAuthenticityScore || 0)) / 2;
-    const overallLabel = getScoreLabel(avgScore);
+    const hasSkills = project.skills && project.skills.length > 0;
+    const testTaken = project.testScore !== undefined && project.testScore !== null;
 
     return (
-        <Card className="project-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--brand-color)', flex: 1, marginRight: '12px' }}>{project.title}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <Card className="project-card" style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            overflow: 'hidden'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--brand-color)' }}>{project.title}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <span style={{
                         padding: '3px 10px', borderRadius: '50px', fontSize: '0.78rem', fontWeight: '700',
                         color: '#fff', backgroundColor: getContributionColor(project.contributionPercentage), whiteSpace: 'nowrap'
@@ -78,87 +84,13 @@ const ProjectCard = ({ project }) => {
                 </div>
             </div>
 
-            {/* Description */}
-            <p style={{ marginBottom: '1.25rem', flex: 1, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            <p style={{ marginBottom: '1.5rem', minHeight: '3em', color: 'var(--text-secondary)' }}>
                 {project.description}
             </p>
 
-            {/* Trust Metrics */}
-            <div style={{
-                marginBottom: '1.25rem',
-                padding: '14px 16px',
-                background: 'linear-gradient(135deg, rgba(var(--brand-rgb, 99,102,241),0.04) 0%, rgba(34,197,94,0.03) 100%)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <h4 style={{ margin: 0, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-tertiary)', fontWeight: '700' }}>
-                        Trust Metrics
-                    </h4>
-                    <span style={{
-                        fontSize: '0.7rem', fontWeight: '700', padding: '2px 8px',
-                        borderRadius: '50px', background: overallLabel.color + '18', color: overallLabel.color
-                    }}>
-                        {overallLabel.text}
-                    </span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                    {/* Consistency Ring */}
-                    <div title="Measures how consistently you committed over time. Rewards long-term steady work.">
-                        <ScoreRing
-                            score={project.commitConsistencyScore}
-                            label="Consistency"
-                            color="#818cf8"
-                        />
-                    </div>
-
-                    {/* Divider */}
-                    <div style={{ width: '1px', height: '50px', background: 'var(--border-color)' }} />
-
-                    {/* Authenticity Ring */}
-                    <div title="Reflects genuine effort: your contribution %, commit volume, consistency, and skills.">
-                        <ScoreRing
-                            score={project.projectAuthenticityScore}
-                            label="Authenticity"
-                            color="#22c55e"
-                        />
-                    </div>
-
-                    {/* Divider */}
-                    <div style={{ width: '1px', height: '50px', background: 'var(--border-color)' }} />
-
-                    {/* Meta Info */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                        {project.activeWeeks > 0 && (
-                            <span>🗓 <strong>{project.activeWeeks}w</strong> active</span>
-                        )}
-                        {project.totalCommitCount > 0 && (
-                            <span>📝 <strong>{project.totalCommitCount}</strong> commits</span>
-                        )}
-                        {project.stars > 0 && (
-                            <span>⭐ <strong>{project.stars}</strong> stars</span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Inline score labels */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: '#818cf820', color: '#818cf8', fontWeight: '600' }}>
-                        Consistency: {consistencyLabel.text}
-                    </span>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', background: authenticityLabel.color + '20', color: authenticityLabel.color, fontWeight: '600' }}>
-                        Authenticity: {authenticityLabel.text}
-                    </span>
-                </div>
-            </div>
-
-            {/* Tech Stack */}
-            <div style={{ marginBottom: '1.25rem' }}>
-                <h4 style={{ fontSize: '0.68rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '0.75rem', letterSpacing: '0.07em', fontWeight: '700' }}>
-                    Verified Tech Stack
-                </h4>
-                {project.skills && project.skills.length > 0 ? (
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
+                {hasSkills ? (
                     <div style={{
                         display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around',
                         height: '120px', padding: '8px 0', gap: '6px',
@@ -210,11 +142,30 @@ const ProjectCard = ({ project }) => {
                 )}
             </div>
 
-            {/* Footer */}
             <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
-                    {project.primaryLanguage && `🔵 ${project.primaryLanguage}`}
-                </span>
+                {testTaken ? (
+                    <span style={{
+                        padding: '4px 14px',
+                        borderRadius: '50px',
+                        fontSize: '0.85rem',
+                        fontWeight: '700',
+                        color: '#fff',
+                        backgroundColor: project.testScore >= 4 ? 'var(--success-color)' : project.testScore >= 2 ? '#eab308' : 'var(--error-color)',
+                    }}>
+                        Test: {project.testScore}/{project.testScore <= 4 ? 4 : 6}
+                    </span>
+                ) : hasSkills ? (
+                    <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={() => navigate(`/skill-test/${project._id}`)}
+                    >
+                        🧪 Take Skill Test
+                    </Button>
+                ) : (
+                    <span></span>
+                )}
+
                 <a
                     href={project.githubLink}
                     target="_blank"

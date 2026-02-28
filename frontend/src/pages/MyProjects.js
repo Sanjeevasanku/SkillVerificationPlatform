@@ -48,7 +48,10 @@ const MyProjects = () => {
             }}>
                 {projects && projects.length > 0 ? (
                     projects.map(project => (
-                        <ProjectCard key={project._id} project={project} />
+                        <ProjectCard
+                            key={project._id}
+                            project={project}
+                        />
                     ))
                 ) : (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>

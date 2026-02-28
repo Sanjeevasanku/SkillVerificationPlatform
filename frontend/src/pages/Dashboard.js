@@ -81,28 +81,10 @@ const Dashboard = () => {
                     <Card title="Quick Stats">
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', textAlign: 'center' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.8rem', color: 'var(--brand-color)', margin: 0 }}>
-                                    {skillData.skills.length}
-                                </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Skills</p>
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.8rem', color: 'var(--success-color)', margin: 0 }}>
+                                <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>
                                     {skillData.overallStats?.projectCount || 0}
                                 </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Projects</p>
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.8rem', color: '#818cf8', margin: 0 }}>
-                                    {Math.round((skillData.overallStats?.averageConsistency || 0) * 100)}%
-                                </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Consistency</p>
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.8rem', color: '#22c55e', margin: 0 }}>
-                                    {Math.round((skillData.overallStats?.averageAuthenticity || 0) * 100)}%
-                                </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Authenticity</p>
+                                <p>Projects</p>
                             </div>
                         </div>
                     </Card>
