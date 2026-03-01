@@ -24,6 +24,34 @@ const MAX_FILE_CHARS = 3000;
 // Max total prompt size in characters (~4 chars per token, target ~8K tokens for code context)
 const MAX_PROMPT_CHARS = 32000;
 
+// Blacklist of skills that should NEVER appear in results — dev tools, linters, utilities, non-skills, etc.
+const SKILL_BLACKLIST = new Set([
+    // Build tools & linters
+    'eslint', 'prettier', 'babel', 'webpack', 'vite', 'parcel', 'rollup',
+    'tslint', 'stylelint', 'npm', 'yarn', 'pnpm', 'nodemon', 'ts-node',
+    // Generic utilities
+    'lodash', 'moment', 'dayjs', 'uuid', 'dotenv', 'cors', 'helmet',
+    'morgan', 'body-parser', 'concurrently', 'cross-env', 'rimraf',
+    // Git & CI
+    'husky', 'lint-staged', 'commitlint', 'editorconfig',
+    // Testing (unless major part of project)
+    'jest', 'mocha', 'chai', 'sinon', 'nyc', 'istanbul', 'cypress',
+    // Scaffolding
+    'react-scripts', 'create-react-app', 'next-config',
+    // Tools / IDEs
+    'git', 'github', 'vs code', 'vscode', 'postman', 'insomnia',
+    // HTTP / small utilities
+    'axios', 'node-fetch', 'got', 'superagent', 'chalk', 'debug',
+    'nodemailer', 'multer', 'sharp', 'pm2', 'forever', 'supervisor',
+    // NOT real skills — too basic or not technology
+    'json', 'xml', 'yaml', 'yml', 'markdown',
+    'google fonts', 'local storage', 'localstorage', 'session storage',
+    'sessionstorage', 'cookies', 'fetch api', 'dom', 'dom manipulation',
+    'responsive design', 'media queries', 'flexbox', 'css grid',
+    'rest', 'restful', 'http', 'https', 'ajax', 'websocket',
+    'npm scripts', 'package.json', 'readme', 'documentation'
+]);
+
 /**
  * Recursively fetch file metadata and content (within limits)
  */
@@ -182,14 +210,17 @@ async function extractSkillsWithGroq(files) {
     if (!apiKey) throw new Error('GROQ_API_KEY not set');
 
     const groq = new Groq({ apiKey });
-    const repoContext = buildRepoContext(files);
+    // Reduced context for Groq — less noise means fewer hallucinated skills
+    const GROQ_MAX_CHARS = 16000;
+    const repoContext = buildRepoContext(files, GROQ_MAX_CHARS);
     const { systemPrompt, userPrompt } = buildSkillExtractionPrompt(repoContext);
 
     console.log(`[SkillDetection] Sending ${repoContext.length} chars to Groq for analysis...`);
 
+    // 70B model first — much better at following strict instructions
     const MODELS = [
-        'llama-3.1-8b-instant',
         'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant',
         'meta-llama/llama-4-scout-17b-16e-instruct'
     ];
 
@@ -213,7 +244,9 @@ async function extractSkillsWithGroq(files) {
 
             console.log(`[SkillDetection] Groq success with model: ${model}`);
             const parsed = JSON.parse(content);
-            return normalizeSkillResults(parsed);
+            // Higher confidence threshold for Groq (0.5 vs 0.4) + blacklist + dedup
+            const skills = normalizeSkillResults(parsed);
+            return filterAndDeduplicateSkills(skills, 0.5);
         } catch (err) {
             console.warn(`[SkillDetection] Groq model ${model} failed: ${err.message}`);
             lastError = err;
@@ -303,6 +336,65 @@ function normalizeSkillResults(result) {
             confidenceScore: Math.min(Math.max(s.confidenceScore, 0.4), 1.0),
             evidence: Array.isArray(s.evidence) ? s.evidence : [s.evidence || 'Detected by LLM analysis']
         }));
+}
+
+/**
+ * Filter out blacklisted skills, apply a minimum confidence threshold, and deduplicate similar entries.
+ * @param {Array} skills - Normalized skill array
+ * @param {number} minConfidence - Minimum confidence to keep (default 0.4)
+ * @returns {Array} - Cleaned skill array
+ */
+function filterAndDeduplicateSkills(skills, minConfidence = 0.4) {
+    // 1. Remove blacklisted skills
+    let filtered = skills.filter(s => {
+        const nameLower = s.name.toLowerCase().trim();
+        if (SKILL_BLACKLIST.has(nameLower)) {
+            console.log(`[SkillDetection] Filtered out blacklisted skill: ${s.name}`);
+            return false;
+        }
+        return true;
+    });
+
+    // 2. Apply minimum confidence threshold
+    filtered = filtered.filter(s => s.confidenceScore >= minConfidence);
+
+    // 3. Deduplicate similar skills (e.g., "Node.js" vs "Node", "MongoDB" vs "Mongoose")
+    const DEDUP_MAP = {
+        'node': 'Node.js', 'nodejs': 'Node.js', 'node.js': 'Node.js',
+        'react': 'React', 'reactjs': 'React', 'react.js': 'React',
+        'react router': 'React', 'react-router': 'React', 'react-router-dom': 'React',
+        'react query': 'React', 'react-query': 'React', '@tanstack/react-query': 'React',
+        'react hook form': 'React', 'react-hook-form': 'React',
+        'vue': 'Vue.js', 'vuejs': 'Vue.js', 'vue.js': 'Vue.js',
+        'vue router': 'Vue.js', 'vue-router': 'Vue.js', 'vuex': 'Vue.js', 'pinia': 'Vue.js',
+        'angular': 'Angular', 'angularjs': 'Angular',
+        'express': 'Express.js', 'expressjs': 'Express.js', 'express.js': 'Express.js',
+        'mongo': 'MongoDB', 'mongodb': 'MongoDB', 'mongoose': 'MongoDB/Mongoose',
+        'postgres': 'PostgreSQL', 'postgresql': 'PostgreSQL', 'pg': 'PostgreSQL',
+        'typescript': 'TypeScript', 'ts': 'TypeScript',
+        'javascript': 'JavaScript', 'js': 'JavaScript',
+        'python': 'Python', 'python3': 'Python',
+        'tailwind': 'Tailwind CSS', 'tailwindcss': 'Tailwind CSS',
+        'next': 'Next.js', 'nextjs': 'Next.js', 'next.js': 'Next.js',
+        'redux': 'Redux', 'redux toolkit': 'Redux', 'react-redux': 'Redux',
+        'docker': 'Docker', 'docker-compose': 'Docker',
+    };
+
+    const seen = new Map(); // canonical name → best skill entry
+    for (const skill of filtered) {
+        const key = DEDUP_MAP[skill.name.toLowerCase()] || skill.name;
+        const existing = seen.get(key);
+        if (!existing || skill.confidenceScore > existing.confidenceScore) {
+            seen.set(key, { ...skill, name: key });
+        } else if (existing) {
+            // Merge evidence from duplicates
+            existing.evidence = [...new Set([...existing.evidence, ...skill.evidence])];
+        }
+    }
+
+    const result = Array.from(seen.values());
+    console.log(`[SkillDetection] After filtering/dedup: ${skills.length} → ${result.length} skills`);
+    return result;
 }
 
 // ============================================================================
@@ -431,4 +523,3 @@ exports.detectSkills = async (owner, repo) => {
         return [];
     }
 };
-
