@@ -4,17 +4,13 @@ import AuthContext from '../context/AuthContext';
 import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
 import { Link } from 'react-router-dom';
-<<<<<<< Updated upstream
 import { AlertDialog, ConfirmDialog } from '../components/common/Dialog';
-=======
->>>>>>> Stashed changes
 
 const HRDashboard = () => {
     const { user } = useContext(AuthContext);
     const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-<<<<<<< Updated upstream
     // Search state
     const [searchSkill, setSearchSkill] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -59,9 +55,6 @@ const HRDashboard = () => {
             variant
         });
     };
-
-=======
->>>>>>> Stashed changes
     useEffect(() => {
         const fetchRoles = async () => {
             try {
@@ -77,7 +70,6 @@ const HRDashboard = () => {
         fetchRoles();
     }, []);
 
-<<<<<<< Updated upstream
     const handleDelete = (roleId) => {
         showConfirmDialog(
             'Delete Role',
@@ -119,27 +111,19 @@ const HRDashboard = () => {
         setSearchResults([]);
         setHasSearched(false);
     };
-
-=======
->>>>>>> Stashed changes
     return (
         <Layout>
             <div style={{ padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>HR Dashboard</h1>
-<<<<<<< Updated upstream
                         <p style={{ color: 'var(--text-secondary)' }}>Welcome back, {user?.fullName}. Manage your job roles and find top candidates.</p>
-=======
-                        <p style={{ color: 'var(--text-secondary)' }}>Welcome back, {user?.fullName}. Manage your job roles and candidate rankings.</p>
->>>>>>> Stashed changes
                     </div>
                     <Link to="/hr/create-role">
                         <Button variant="primary">Create New Role</Button>
                     </Link>
                 </div>
 
-<<<<<<< Updated upstream
                 {/* --- Search Section --- */}
                 <div style={{
                     background: 'var(--bg-secondary)',
@@ -244,8 +228,6 @@ const HRDashboard = () => {
                 )}
 
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your Posted Roles</h2>
-=======
->>>>>>> Stashed changes
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                     {loading ? (
                         <p>Loading roles...</p>
@@ -258,7 +240,6 @@ const HRDashboard = () => {
                                 border: '1px solid var(--border-color)',
                                 display: 'flex',
                                 flexDirection: 'column',
-<<<<<<< Updated upstream
                                 justifyContent: 'space-between',
                                 position: 'relative' // For absolute positioning of the delete button
                             }}>
@@ -282,16 +263,10 @@ const HRDashboard = () => {
                                     onMouseLeave={(e) => e.target.style.opacity = 0.7}
                                     title="Delete Role"
                                 >
-                                    🗑️
+                                   Delete 
                                 </button>
                                 <div style={{ marginTop: '10px' }}> {/* Margin to avoid overlapping with delete button */}
                                     <h3 style={{ marginBottom: '0.5rem', paddingRight: '25px' }}>{role.title}</h3>
-=======
-                                justifyContent: 'space-between'
-                            }}>
-                                <div>
-                                    <h3 style={{ marginBottom: '0.5rem' }}>{role.title}</h3>
->>>>>>> Stashed changes
                                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                         {role.description}
                                     </p>

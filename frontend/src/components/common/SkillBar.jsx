@@ -78,7 +78,7 @@ const SkillBar = ({ name, confidence, level, testResult, onTestClick }) => {
                                     e.target.style.borderColor = 'rgba(10, 102, 194, 0.2)';
                                 }}
                             >
-                                🧪 Test
+                                Test
                             </button>
                         )}
                     </div>
