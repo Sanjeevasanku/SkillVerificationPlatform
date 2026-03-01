@@ -68,7 +68,7 @@ const Login = () => {
                 <Button
                     type="button"
                     variant={selectedRole === 'student' ? 'primary' : 'secondary'}
-                    onClick={() => setFormData({ ...formData, selectedRole: 'student' })}
+                    onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'student' }))}
                     style={{ flex: 1 }}
                 >
                     Student
@@ -76,7 +76,7 @@ const Login = () => {
                 <Button
                     type="button"
                     variant={selectedRole === 'hr' ? 'primary' : 'secondary'}
-                    onClick={() => setFormData({ ...formData, selectedRole: 'hr' })}
+                    onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'hr' }))}
                     style={{ flex: 1 }}
                 >
                     HR

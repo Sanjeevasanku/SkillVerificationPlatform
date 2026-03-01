@@ -120,7 +120,6 @@ const Register = () => {
                     onChange={onChange}
                     required
                     placeholder="e.g. John Doe"
-                    disabled={isGithubSync}
                 />
                 <Input
                     label="Email Address"
@@ -130,7 +129,6 @@ const Register = () => {
                     onChange={onChange}
                     required
                     placeholder="Enter your email"
-                    disabled={isGithubSync}
                 />
 
                 <Input
@@ -178,30 +176,6 @@ const Register = () => {
                     </>
                 )}
 
-                <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                        I am a...
-                    </label>
-                    <select
-                        name="role"
-                        value={role}
-                        onChange={onChange}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--border-color)',
-                            fontSize: '1rem',
-                            outline: 'none',
-                            backgroundColor: 'var(--bg-secondary)',
-                            color: 'var(--text-primary)'
-                        }}
-                        disabled={isGithubSync}
-                    >
-                        <option value="student">Student / Job Seeker</option>
-                        <option value="hr">Recruiter / Employer</option>
-                    </select>
-                </div>
 
                 {error && (
                     <div style={{

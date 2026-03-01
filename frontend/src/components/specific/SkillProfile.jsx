@@ -25,8 +25,16 @@ const SkillProfile = ({ skills, categorySummary, loading, onTestClick }) => {
 
     return (
         <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))' }}>
-            <Card title="Verified Skills">
-                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+            <Card title="Verified Skills" style={{ display: 'flex', flexDirection: 'column', height: '420px', overflow: 'hidden' }}>
+                <div
+                    className="custom-scrollbar"
+                    style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        paddingRight: '0.75rem',
+                        marginRight: '-0.25rem'
+                    }}
+                >
                     {skills.map((skill, index) => (
                         <SkillBar
                             key={index}
@@ -40,8 +48,19 @@ const SkillProfile = ({ skills, categorySummary, loading, onTestClick }) => {
                 </div>
             </Card>
 
-            <Card title="Expertise by Category">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Card title="Expertise by Category" style={{ display: 'flex', flexDirection: 'column', height: '420px', overflow: 'hidden' }}>
+                <div
+                    className="custom-scrollbar"
+                    style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        paddingRight: '0.75rem',
+                        marginRight: '-0.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                    }}
+                >
                     {categorySummary.map((cat, index) => (
                         <div key={index} style={{
                             padding: '1rem',
@@ -50,7 +69,7 @@ const SkillProfile = ({ skills, categorySummary, loading, onTestClick }) => {
                             border: '1px solid var(--border-color)'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ fontWeight: '600' }}>{cat.category}</span>
+                                <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{cat.category}</span>
                                 <span style={{ color: 'var(--brand-color)', fontWeight: '700' }}>
                                     {Math.round(cat.score * 100)}%
                                 </span>

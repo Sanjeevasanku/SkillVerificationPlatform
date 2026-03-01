@@ -4,15 +4,11 @@ module.exports = function (req, res, next) {
     // Get token from header
     const authHeader = req.header('Authorization');
 
-    console.log('DEBUG: Auth Middleware - Header:', authHeader);
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('DEBUG: Auth Middleware - Missing or invalid header');
         return res.status(401).json({ msg: 'No token, authorization denied' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('DEBUG: Auth Middleware - Token extracted');
 
     // Verify token
     try {

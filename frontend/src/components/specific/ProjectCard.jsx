@@ -1,6 +1,5 @@
 import React from 'react';
 import Card from '../common/Card';
-import Button from '../common/Button';
 
 const ProjectCard = ({ project }) => {
     const getContributionColor = (percent) => {
@@ -46,12 +45,12 @@ const ProjectCard = ({ project }) => {
                 {hasSkills ? (
                     <div style={{
                         display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around',
-                        height: '120px', padding: '8px 0', gap: '6px',
+                        height: '140px', padding: '8px 0', gap: '8px',
                         background: 'rgba(0,0,0,0.02)', borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--border-color)', paddingTop: '28px'
                     }}>
                         {project.skills.map((skill, i) => {
-                            const barColor = `hsl(${(i * 47 + 210) % 360}, 70%, 60%)`;
+                            const barColor = 'var(--brand-color)';
                             return (
                                 <div key={i} style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -60,7 +59,7 @@ const ProjectCard = ({ project }) => {
                                     <div
                                         title={`${skill.name}: ${(skill.confidenceScore * 100).toFixed(0)}%`}
                                         style={{
-                                            width: '100%', maxWidth: '32px',
+                                            width: '100%', maxWidth: '28px',
                                             height: `${skill.confidenceScore * 100}%`,
                                             backgroundColor: barColor,
                                             borderRadius: '4px 4px 0 0',

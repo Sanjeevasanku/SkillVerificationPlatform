@@ -1,5 +1,6 @@
-const { generateStudentSkillProfile } = require('../services/studentSkillService');
 const Student = require('../models/Student');
+const Repository = require('../models/Repository');
+const { generateStudentSkillProfile } = require('../services/studentSkillService');
 
 /**
  * Controller to handle student skill profile requests
@@ -35,6 +36,12 @@ const getStudentProfileById = async (req, res) => {
 
         const skillProfile = await generateStudentSkillProfile(student._id);
 
+        // Fetch student's verified projects
+        const projects = await Repository.find({
+            student: student._id,
+            verificationStatus: 'verified'
+        }).populate('skills');
+
         res.json({
             student: {
                 id: student._id,
@@ -45,6 +52,7 @@ const getStudentProfileById = async (req, res) => {
                 graduationYear: student.graduationYear,
                 githubUsername: student.githubUsername
             },
+            projects,
             ...skillProfile
         });
     } catch (err) {

@@ -4,6 +4,7 @@ import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Card from '../components/common/Card';
 import SkillProfile from '../components/specific/SkillProfile';
+import ProjectCard from '../components/specific/ProjectCard';
 
 const StudentProfileView = () => {
     const { studentId } = useParams();
@@ -51,7 +52,7 @@ const StudentProfileView = () => {
         );
     }
 
-    const { student, skills, categorySummary, overallStats } = profileData;
+    const { student, skills, categorySummary, overallStats, projects } = profileData;
 
     return (
         <Layout>
@@ -103,6 +104,24 @@ const StudentProfileView = () => {
                         loading={false}
                     />
                 </div>
+
+                {projects && projects.length > 0 && (
+                    <div style={{ marginBottom: '2.5rem' }}>
+                        <h2 style={{ marginBottom: '1.5rem' }}>Verified Projects</h2>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                            gap: '1.5rem'
+                        }}>
+                            {projects.map(project => (
+                                <ProjectCard
+                                    key={project._id}
+                                    project={project}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </Layout>
     );

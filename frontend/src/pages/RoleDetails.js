@@ -99,18 +99,52 @@ const RoleDetails = () => {
                                         </span>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                        <div>
-                                            <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{(student.readinessScore * 100).toFixed(0)}%</span> Match
-                                        </div>
-                                        {student.weakSkills.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        <div style={{ display: 'flex', gap: '20px' }}>
                                             <div>
-                                                <span style={{ color: 'var(--warning-color)' }}>⚠ {student.weakSkills.length} Weak Skills</span>
+                                                <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{(student.readinessScore * 100).toFixed(0)}%</span> Match
+                                            </div>
+                                        </div>
+
+                                        {(() => {
+                                            const matched = student.skillBreakdown?.filter(s => s.score >= 0.6).map(s => s.skill) || [];
+                                            return matched.length > 0 && (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                                                    <span style={{ color: 'var(--success-color)', fontWeight: '600', minWidth: '100px' }}>✓ Existing:</span>
+                                                    {matched.map(s => (
+                                                        <span key={s} style={{
+                                                            padding: '2px 8px', border: '1px solid var(--success-color)',
+                                                            borderRadius: '4px', fontSize: '0.75rem', color: 'var(--success-color)',
+                                                            backgroundColor: 'rgba(5, 118, 66, 0.05)'
+                                                        }}>{s}</span>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {student.weakSkills.length > 0 && (
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                                                <span style={{ color: 'var(--warning-color)', fontWeight: '600', minWidth: '100px' }}>⚠ Weak in:</span>
+                                                {student.weakSkills.map(s => (
+                                                    <span key={s} style={{
+                                                        padding: '2px 8px', border: '1px solid var(--warning-color)',
+                                                        borderRadius: '4px', fontSize: '0.75rem', color: 'var(--warning-color)',
+                                                        backgroundColor: 'rgba(245, 158, 11, 0.05)'
+                                                    }}>{s}</span>
+                                                ))}
                                             </div>
                                         )}
+
                                         {student.missingSkills.length > 0 && (
-                                            <div>
-                                                <span style={{ color: 'var(--error-color)' }}>✕ {student.missingSkills.length} Missing</span>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                                                <span style={{ color: 'var(--error-color)', fontWeight: '600', minWidth: '100px' }}>✕ Missing:</span>
+                                                {student.missingSkills.map(s => (
+                                                    <span key={s} style={{
+                                                        padding: '2px 8px', border: '1px solid var(--error-color)',
+                                                        borderRadius: '4px', fontSize: '0.75rem', color: 'var(--error-color)',
+                                                        backgroundColor: 'rgba(239, 68, 68, 0.05)'
+                                                    }}>{s}</span>
+                                                ))}
                                             </div>
                                         )}
                                     </div>
