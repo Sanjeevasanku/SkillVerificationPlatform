@@ -15,11 +15,11 @@ const difficultyColors = {
 };
 
 const difficultyLabels = {
-    easy: '🟢 Easy',
-    medium: '🟡 Medium',
-    hard: '🔴 Hard',
-    hell: '💀 Hell',
-    expert: '🧠 Expert'
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+    hell: 'Pro',
+    expert: 'Expert'
 };
 
 const formatTime = (seconds) => {
@@ -200,7 +200,7 @@ const SkillTest = () => {
         return (
             <Layout>
                 <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
-                    <h2 style={{ color: 'var(--error-color)' }}>⚠️ {error}</h2>
+                    <h2 style={{ color: 'var(--error-color)' }}> {error}</h2>
                     <Button variant="secondary" onClick={() => navigate('/dashboard')}>
                         Back to Dashboard
                     </Button>
@@ -228,8 +228,8 @@ const SkillTest = () => {
             <Layout>
                 <div style={{ maxWidth: '700px', margin: '0 auto' }}>
                     <Card style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-                        <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
-                            {finalResult.totalScore >= 4 ? '🎉' : finalResult.totalScore >= 2 ? '👏' : '😬'}
+                        <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: finalResult.totalScore >= 4 ? 'var(--success-color)' : finalResult.totalScore >= 2 ? 'var(--brand-color)' : 'var(--error-color)' }}>
+                            {finalResult.totalScore >= 4 ? 'Excellent Performance' : finalResult.totalScore >= 2 ? 'Good Effort' : 'Needs Improvement'}
                         </h1>
                         <h2 style={{ marginBottom: '0.5rem' }}>Test Complete</h2>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{skillName}</p>
@@ -278,7 +278,7 @@ const SkillTest = () => {
                                         backgroundColor: ev.score === 1 ? 'rgba(5, 118, 66, 0.08)' : 'rgba(204, 16, 22, 0.08)',
                                         border: `1px solid ${ev.score === 1 ? 'rgba(5, 118, 66, 0.2)' : 'rgba(204, 16, 22, 0.2)'}`
                                     }}>
-                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '✅' : '❌'}</span>
+                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '' : ''}</span>
                                         <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontSize: '0.9rem' }}>{ev.feedback}</span>
                                     </div>
                                 ))}
@@ -290,7 +290,7 @@ const SkillTest = () => {
                                         backgroundColor: ev.score === 1 ? 'rgba(5, 118, 66, 0.08)' : 'rgba(204, 16, 22, 0.08)',
                                         border: `1px solid ${ev.score === 1 ? 'rgba(5, 118, 66, 0.2)' : 'rgba(204, 16, 22, 0.2)'}`
                                     }}>
-                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '✅' : '❌'}</span>
+                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '' : ''}</span>
                                         <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontSize: '0.9rem' }}>{ev.feedback}</span>
                                     </div>
                                 ))}
@@ -348,14 +348,14 @@ const SkillTest = () => {
                         fontVariantNumeric: 'tabular-nums',
                         transition: 'background 0.3s ease'
                     }}>
-                        ⏱ {formatTime(timer)}
+                        {formatTime(timer)}
                     </div>
                 </div>
 
                 {isRound2 && round1Evaluation && (
                     <Card style={{ marginBottom: '1.5rem', backgroundColor: 'rgba(10, 102, 194, 0.05)' }}>
                         <p style={{ margin: 0, fontWeight: '600', color: 'var(--brand-color)' }}>
-                            🎯 Round 1 Score: {round1Score}/4 — Nice! Now tackle 2 expert-level questions.
+                            Round 1 Score: {round1Score}/4 — Well done. Now attempt 2 expert-level questions.
                         </p>
                     </Card>
                 )}

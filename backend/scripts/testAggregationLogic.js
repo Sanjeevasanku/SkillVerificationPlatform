@@ -84,15 +84,15 @@ const runTest = async () => {
     console.log(`React Evidence: (0.8*0.8 + 0.9*1.0) / (0.8+1.0) = ${expectedReactConf}`);
 
     if (react && react.confidence === expectedReactConf) {
-        console.log("✅ React weighted confidence correct");
+        console.log(" React weighted confidence correct");
     } else {
-        console.log("❌ React weighted confidence incorrect. Got:", react ? react.confidence : 'N/A');
+        console.log(" React weighted confidence incorrect. Got:", react ? react.confidence : 'N/A');
     }
 
     if (skillList.find(s => s.name === 'LowConf')) {
-        console.log("❌ Low confidence skill not ignored");
+        console.log(" Low confidence skill not ignored");
     } else {
-        console.log("✅ Low confidence skill ignored (<0.4)");
+        console.log(" Low confidence skill ignored (<0.4)");
     }
 
     console.log("--- Test Complete ---");

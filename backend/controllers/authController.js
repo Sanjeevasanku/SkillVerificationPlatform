@@ -114,10 +114,7 @@ exports.login = async (req, res) => {
                         id: student._id,
                         fullName: student.fullName,
                         email: student.email,
-                        role: student.role,
-                        college: student.college,
-                        branch: student.branch,
-                        graduationYear: student.graduationYear
+                        role: student.role
                     }
                 });
             }
@@ -204,10 +201,7 @@ exports.registerStudent = async (req, res) => {
                         id: student._id,
                         fullName: student.fullName,
                         email: student.email,
-                        role: student.role,
-                        college: student.college,
-                        branch: student.branch,
-                        graduationYear: student.graduationYear
+                        role: student.role
                     }
                 });
             }

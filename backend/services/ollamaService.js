@@ -5,8 +5,8 @@
 
 const axios = require('axios');
 
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'codellama';
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'https://80b1-122-177-240-52.ngrok-free.app';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:3b';
 
 /**
  * Check if Ollama server is available
@@ -14,9 +14,18 @@ const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'codellama';
  */
 async function isAvailable() {
     try {
-        const response = await axios.get(`${OLLAMA_BASE_URL}/api/tags`, { timeout: 3000 });
-        return response.status === 200;
-    } catch {
+        const response = await axios.get(`${OLLAMA_BASE_URL}/api/tags`, {
+            timeout: 8000,
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+                'User-Agent': 'SkillVerify/1.0'
+            }
+        });
+        const isJson = typeof response.data === 'object';
+        console.log(`[OllamaService] Server check: status=${response.status}, isJson=${isJson}`);
+        return response.status === 200 && isJson;
+    } catch (err) {
+        console.warn(`[OllamaService] Server not available: ${err.message}`);
         return false;
     }
 }
@@ -38,7 +47,7 @@ async function chat(messages, options = {}) {
     console.log(`[OllamaService] Sending request to ${model}...`);
 
     try {
-        const response = await axios.post(`${OLLAMA_BASE_URL}/api/chat`, {
+        const postData = {
             model,
             messages,
             stream: false,
@@ -46,10 +55,34 @@ async function chat(messages, options = {}) {
                 temperature,
                 num_predict: 4096
             }
-        }, {
+        };
+
+        const axiosConfig = {
             timeout: timeoutMs,
-            headers: { 'Content-Type': 'application/json' }
-        });
+            maxRedirects: 0,  // Don't auto-follow redirects (they convert POST→GET)
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true',
+                'User-Agent': 'SkillVerify/1.0'
+            }
+        };
+
+        let response;
+        try {
+            response = await axios.post(`${OLLAMA_BASE_URL}/api/chat`, postData, axiosConfig);
+        } catch (redirectErr) {
+            // If we get a redirect (301/302), re-POST to the new URL
+            if (redirectErr.response && [301, 302, 307, 308].includes(redirectErr.response.status)) {
+                const redirectUrl = redirectErr.response.headers.location;
+                console.log(`[OllamaService] Following redirect to: ${redirectUrl}`);
+                response = await axios.post(redirectUrl, postData, {
+                    ...axiosConfig,
+                    maxRedirects: 5  // Allow normal redirects on the final URL
+                });
+            } else {
+                throw redirectErr;
+            }
+        }
 
         const content = response.data?.message?.content;
         if (!content) {
@@ -65,7 +98,7 @@ async function chat(messages, options = {}) {
         if (err.code === 'ETIMEDOUT' || err.message?.includes('timeout')) {
             throw new Error(`Ollama request timed out after ${timeoutMs}ms. The model may be loading or the prompt is too large.`);
         }
-        throw new Error(`Ollama request failed: ${err.message}`);
+        throw new Error(`Ollama request failed: ${err.response?.status || err.message}`);
     }
 }
 

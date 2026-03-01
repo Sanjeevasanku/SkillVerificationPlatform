@@ -79,7 +79,7 @@ async function getRepoFiles(owner, repo) {
  * @param {Array} files - Array of { path, content }
  * @returns {string} - Formatted context string
  */
-function buildRepoContext(files) {
+function buildRepoContext(files, maxChars = MAX_PROMPT_CHARS) {
     // Priority order: manifest files first, then config files, then source code
     const priority = {
         'package.json': 1,
@@ -119,15 +119,17 @@ function buildRepoContext(files) {
     let context = `## Project File Tree\n${fileTree}\n\n## File Contents\n`;
     let totalChars = context.length;
 
+    // Reduce per-file limit for smaller context windows
+    const perFileLimit = maxChars < 15000 ? 1500 : MAX_FILE_CHARS;
+
     for (const file of sorted) {
-        const fileName = file.path.split('/').pop();
-        const truncatedContent = file.content.length > MAX_FILE_CHARS
-            ? file.content.substring(0, MAX_FILE_CHARS) + '\n... (truncated)'
+        const truncatedContent = file.content.length > perFileLimit
+            ? file.content.substring(0, perFileLimit) + '\n... (truncated)'
             : file.content;
 
         const fileSection = `\n### ${file.path}\n\`\`\`\n${truncatedContent}\n\`\`\`\n`;
 
-        if (totalChars + fileSection.length > MAX_PROMPT_CHARS) {
+        if (totalChars + fileSection.length > maxChars) {
             context += `\n... (${sorted.indexOf(file)}/${sorted.length} files shown, remaining files omitted for brevity)\n`;
             break;
         }
@@ -144,22 +146,99 @@ function buildRepoContext(files) {
  * @param {Array} files - Array of { path, content }
  * @returns {Promise<Array>} - Array of { name, category, confidenceScore, evidence }
  */
-async function extractSkillsWithLLM(files) {
-    const repoContext = buildRepoContext(files);
+/**
+ * Extract skills using Ollama LLM
+ * Smaller context for local models (3B-7B) to avoid confusion
+ * @param {Array} files - Array of { path, content }
+ * @returns {Promise<Array>} - Array of { name, category, confidenceScore, evidence }
+ */
+async function extractSkillsWithOllama(files) {
+    // Smaller context for local models — 12K chars (~3K tokens) to stay within 4K context window
+    const OLLAMA_MAX_CHARS = 12000;
+    const repoContext = buildRepoContext(files, OLLAMA_MAX_CHARS);
+    const { systemPrompt, userPrompt } = buildSkillExtractionPrompt(repoContext);
 
+    console.log(`[SkillDetection] Sending ${repoContext.length} chars to Ollama for analysis...`);
+
+    const result = await ollamaService.chatJSON([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+    ], {
+        temperature: 0.2,
+        timeoutMs: 180000
+    });
+
+    return normalizeSkillResults(result);
+}
+
+/**
+ * Extract skills using Groq cloud LLM (fallback when Ollama is unavailable)
+ * @param {Array} files - Array of { path, content }
+ * @returns {Promise<Array>} - Array of { name, category, confidenceScore, evidence }
+ */
+async function extractSkillsWithGroq(files) {
+    const Groq = require('groq-sdk');
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error('GROQ_API_KEY not set');
+
+    const groq = new Groq({ apiKey });
+    const repoContext = buildRepoContext(files);
+    const { systemPrompt, userPrompt } = buildSkillExtractionPrompt(repoContext);
+
+    console.log(`[SkillDetection] Sending ${repoContext.length} chars to Groq for analysis...`);
+
+    const MODELS = [
+        'llama-3.1-8b-instant',
+        'llama-3.3-70b-versatile',
+        'meta-llama/llama-4-scout-17b-16e-instruct'
+    ];
+
+    let lastError;
+    for (const model of MODELS) {
+        try {
+            console.log(`[SkillDetection] Trying Groq model: ${model}`);
+            const response = await groq.chat.completions.create({
+                model,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.2,
+                max_tokens: 4096,
+                response_format: { type: 'json_object' }
+            });
+
+            const content = response.choices[0]?.message?.content;
+            if (!content) throw new Error('Empty response from Groq');
+
+            console.log(`[SkillDetection] Groq success with model: ${model}`);
+            const parsed = JSON.parse(content);
+            return normalizeSkillResults(parsed);
+        } catch (err) {
+            console.warn(`[SkillDetection] Groq model ${model} failed: ${err.message}`);
+            lastError = err;
+        }
+    }
+    throw new Error(`All Groq models failed. Last error: ${lastError?.message}`);
+}
+
+/**
+ * Build the skill extraction prompt (shared between Ollama and Groq)
+ */
+function buildSkillExtractionPrompt(repoContext) {
     const systemPrompt = `You are an expert software engineer performing a deep code analysis. Your job is to analyze a GitHub repository's ACTUAL CODE and identify all technologies, frameworks, libraries, and tools that are GENUINELY USED in the project.
 
 ABSOLUTE RULE: You must ONLY report skills/technologies that you can see DIRECT EVIDENCE for in the provided code files below. If you do not see a technology imported, used, or configured in the files shown, DO NOT include it. NEVER guess or assume technologies. If only 1-2 files are provided, only report what those files show — do not hallucinate additional technologies.
 
 CRITICAL RULES — READ CAREFULLY:
 
-1. DO NOT trust package.json / requirements.txt alone. Dependencies listed in manifests may be installed but NEVER actually used in the code. You MUST cross-reference:
+1. DO NOT trust package.json / requirements.txt / pom.xml alone. Dependencies listed in manifests may be installed but NEVER actually used in the code. You MUST cross-reference:
    - Is the dependency actually imported/required in any source file?
    - Is there real usage of its APIs, functions, or classes in the code?
-   - If a dependency appears ONLY in package.json but is NEVER imported or used in any .js/.ts/.py file, give it a confidenceScore of 0.0 (exclude it).
+   - If a dependency appears ONLY in a manifest but is NEVER imported or used in any source file, give it a confidenceScore of 0.0 (exclude it).
 
 2. Confidence scoring based on VERIFIED USAGE:
-   - 0.9-1.0: Core technology — imported in many files, APIs used extensively (e.g., Express with app.get/post in multiple routes, React with JSX + hooks in many components)
+   - 0.9-1.0: Core technology — imported in many files, APIs used extensively
    - 0.7-0.8: Significant usage — imported and actively used in several files
    - 0.5-0.6: Moderate usage — imported and used in 1-2 files
    - 0.4: Minimal but confirmed usage — imported at least once with at least one API call
@@ -170,13 +249,25 @@ CRITICAL RULES — READ CAREFULLY:
    - "useState and useEffect hooks used in 8 component files"
    - NOT just "Found in package.json" — that alone is NOT sufficient evidence
 
-4. Also detect technologies that have NO manifest entry but are clearly used:
-   - CSS Grid/Flexbox patterns in stylesheets
-   - REST API patterns, JWT authentication flows
-   - Design patterns (MVC, middleware chains, etc.)
-   - Languages (JavaScript, Python, etc.) based on file extensions and syntax
+4. EXCLUDE the following — they are NOT skills a recruiter cares about:
+   - Dev tools and linters: ESLint, Prettier, Babel, Webpack, Vite, Parcel, Rollup, TSLint, Stylelint
+   - Package managers: npm, yarn, pnpm
+   - Sub-libraries of a framework (group them under the parent):
+     - React Router, React Query, React Hook Form, Redux Toolkit → just report "React" with higher confidence
+     - Express middleware (cors, helmet, morgan) → just report "Express.js"
+     - Mongoose plugins → just report "MongoDB/Mongoose"
+   - Generic utilities: lodash, moment, dayjs, uuid, dotenv, axios (unless axios IS the core API layer)
+   - Testing frameworks should ONLY be included if testing is a MAJOR part of the project
 
-5. Categories: "Frontend Framework", "Backend Framework", "Database", "Language", "DevOps", "CSS Framework", "Testing", "Authentication", "State Management", "Build Tool", "API", "ORM/ODM", etc.
+5. Also detect technologies that have NO manifest entry but are clearly used:
+   - REST API design, GraphQL APIs
+   - Authentication patterns (JWT, OAuth, session-based)
+   - Database usage patterns
+   - Languages (JavaScript, TypeScript, Python, Java, C++, etc.)
+
+6. Categories: "Frontend Framework", "Backend Framework", "Database", "Language", "CSS Framework", "Authentication", "State Management", "Cloud/DevOps", "API", "ORM/ODM", "Machine Learning", etc.
+
+7. Aim for 3-8 MAJOR skills per project. Do NOT list every tiny library. Think: "What would a recruiter put on a job listing?"
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 {
@@ -185,30 +276,25 @@ Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
       "name": "React",
       "category": "Frontend Framework",
       "confidenceScore": 0.9,
-      "evidence": ["Imported in 12 component files via import React from 'react'", "JSX syntax used throughout", "Hooks: useState in 8 files, useEffect in 6 files, useContext in 3 files"]
+      "evidence": ["Imported in 12 component files", "Hooks: useState, useEffect, useContext used extensively", "React Router for navigation, React Query for data fetching"]
     }
   ]
 }`;
 
     const userPrompt = `Analyze this GitHub repository and extract all technologies/skills used:\n\n${repoContext}`;
 
-    console.log(`[SkillDetection] Sending ${repoContext.length} chars to Ollama for analysis...`);
+    return { systemPrompt, userPrompt };
+}
 
-    const result = await ollamaService.chatJSON([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-    ], {
-        temperature: 0.2,
-        timeoutMs: 180000 // 3 minutes for large repos
-    });
-
-    // Validate and normalize the response
+/**
+ * Normalize LLM skill results into consistent format
+ */
+function normalizeSkillResults(result) {
     const skills = result.skills || result;
     if (!Array.isArray(skills)) {
         throw new Error('LLM response does not contain a skills array');
     }
 
-    // Normalize each skill
     return skills
         .filter(s => s.name && s.confidenceScore >= 0.4)
         .map(s => ({
@@ -231,7 +317,7 @@ Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 function extractSkillsWithRules(files) {
     // 1. Parse Dependencies
     const { dependencyList, detectedFiles } = parseDependencies(files);
-    console.log(`[SkillDetection] Detected manifest files: ${detectedFiles.join(', ')} `);
+    console.log(`[SkillDetection] Detected manifest files: ${detectedFiles.join(', ')}`);
     console.log(`[SkillDetection] Found ${dependencyList.length} dependencies.`);
 
     // 2. Scan Code Files
@@ -255,14 +341,14 @@ function extractSkillsWithRules(files) {
         if (!evidenceObj.fileIndicatorFound && rules.fileIndicators) {
             if (rules.fileIndicators.some(ind => detectedFiles.includes(ind))) {
                 evidenceObj.fileIndicatorFound = true;
-                scanResult.evidence.push(`File indicator: ${rules.fileIndicators.find(ind => detectedFiles.includes(ind))} `);
+                scanResult.evidence.push(`File indicator: ${rules.fileIndicators.find(ind => detectedFiles.includes(ind))}`);
             }
         }
 
         const confidenceScore = calculateConfidence(evidenceObj);
 
         if (confidenceScore >= 0.4) {
-            console.log(`[SkillDetection] Found ${rules.name} with score ${confidenceScore} `);
+            console.log(`[SkillDetection] Found ${rules.name} with score ${confidenceScore}`);
             const evidenceList = [];
             if (evidenceObj.dependencyFound) evidenceList.push("Dependency in manifest");
             evidenceList.push(...scanResult.evidence);
@@ -285,18 +371,18 @@ function extractSkillsWithRules(files) {
 
 /**
  * Detect skills from a repository.
- * Uses LLM mode (Ollama) if available, falls back to rule-based engine.
+ * Priority: Ollama (local) → Groq (cloud) → Rule-based (fallback)
  */
 exports.detectSkills = async (owner, repo) => {
     try {
-        console.log(`🔍 Detecting skills for ${owner} / ${repo}...`);
+        console.log(`🔍 Detecting skills for ${owner}/${repo}...`);
 
         // 1. Traverse and fetch files
         const files = await getRepoFiles(owner, repo);
         console.log(`[SkillDetection] Fetched ${files.length} code files for analysis.`);
 
         if (files.length === 0) {
-            console.warn(`[SkillDetection] No files found for ${owner} / ${repo}.Check depth / limits.`);
+            console.warn(`[SkillDetection] No files found for ${owner}/${repo}. Check depth/limits.`);
             return [];
         }
 
@@ -304,32 +390,45 @@ exports.detectSkills = async (owner, repo) => {
         const mode = process.env.SKILL_DETECTION_MODE || 'llm';
 
         if (mode === 'llm') {
-            // Try LLM first, fall back to rules
+            // Try Ollama first
             const ollamaReady = await ollamaService.isAvailable();
-
             if (ollamaReady) {
                 try {
-                    console.log(`[SkillDetection] Using LLM mode(Ollama: ${ollamaService.OLLAMA_MODEL})`);
-                    const skills = await extractSkillsWithLLM(files);
-                    console.log(`✅ LLM skill detection complete.Found ${skills.length} skills.`);
+                    console.log(`[SkillDetection] Using Ollama LLM (${ollamaService.OLLAMA_MODEL})`);
+                    const skills = await extractSkillsWithOllama(files);
+                    console.log(` Ollama skill detection complete. Found ${skills.length} skills.`);
                     return skills;
-                } catch (llmError) {
-                    console.error(`[SkillDetection] LLM extraction failed: ${llmError.message} `);
-                    console.log(`[SkillDetection] Falling back to rule - based detection...`);
+                } catch (ollamaError) {
+                    console.error(`[SkillDetection] Ollama failed: ${ollamaError.message}`);
                 }
             } else {
-                console.warn('[SkillDetection] Ollama server not available. Falling back to rule-based detection.');
+                console.warn('[SkillDetection] Ollama not available.');
             }
+
+            // Try Groq as second option
+            if (process.env.GROQ_API_KEY) {
+                try {
+                    console.log('[SkillDetection] Trying Groq cloud LLM...');
+                    const skills = await extractSkillsWithGroq(files);
+                    console.log(` Groq skill detection complete. Found ${skills.length} skills.`);
+                    return skills;
+                } catch (groqError) {
+                    console.error(`[SkillDetection] Groq failed: ${groqError.message}`);
+                }
+            }
+
+            console.log('[SkillDetection] All LLM providers unavailable. Falling back to rule-based detection.');
         }
 
         // 3. Rule-based fallback
         console.log('[SkillDetection] Using rule-based mode');
         const finalSkills = extractSkillsWithRules(files);
-        console.log(`✅ Rule - based skill detection complete.Found ${finalSkills.length} skills.`);
+        console.log(` Rule-based skill detection complete. Found ${finalSkills.length} skills.`);
         return finalSkills;
 
     } catch (err) {
         console.error('Error in detectSkills:', err.message);
-        return []; // Return empty on failure to prevent crashing parent flow
+        return [];
     }
 };
+

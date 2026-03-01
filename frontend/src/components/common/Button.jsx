@@ -6,6 +6,9 @@ const Button = ({
     size = 'medium',
     className = '',
     disabled = false,
+    style: userStyle,
+    onMouseEnter: userOnMouseEnter,
+    onMouseLeave: userOnMouseLeave,
     ...props
 }) => {
     const baseStyles = {
@@ -52,26 +55,31 @@ const Button = ({
     return (
         <button
             className={`btn ${className}`}
+            disabled={disabled}
+            {...props}
             style={{
                 ...baseStyles,
                 ...variants[variant],
                 ...sizes[size],
+                ...userStyle,
             }}
-            disabled={disabled}
-            {...props}
             onMouseEnter={(e) => {
-                if (!disabled && variant === 'primary') e.currentTarget.style.background = 'var(--brand-hover)';
-                if (!disabled && variant === 'secondary') e.currentTarget.style.background = 'rgba(10, 102, 194, 0.05)';
-                if (!disabled && variant === 'ghost') {
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
-                    e.currentTarget.style.color = 'var(--text-primary)';
+                if (!disabled) {
+                    if (variant === 'primary') e.currentTarget.style.background = 'var(--brand-hover)';
+                    if (variant === 'secondary') e.currentTarget.style.background = 'rgba(10, 102, 194, 0.08)';
+                    if (variant === 'ghost') {
+                        e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                    }
                 }
+                if (userOnMouseEnter) userOnMouseEnter(e);
             }}
             onMouseLeave={(e) => {
                 if (!disabled) {
                     e.currentTarget.style.background = variants[variant].background;
                     e.currentTarget.style.color = variants[variant].color;
                 }
+                if (userOnMouseLeave) userOnMouseLeave(e);
             }}
         >
             {children}

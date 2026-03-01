@@ -20,9 +20,9 @@ try {
     console.log('Decrypted Token:', decrypted);
 
     if (mockToken === decrypted) {
-        console.log('✅ Encryption/Decryption Test Passed!');
+        console.log(' Encryption/Decryption Test Passed!');
     } else {
-        console.log('❌ Encryption/Decryption Test Failed!');
+        console.log(' Encryption/Decryption Test Failed!');
     }
 } catch (err) {
     console.error('Error during test:', err.message);
