@@ -120,7 +120,7 @@ const RoleDetails = () => {
                                     <Link to={`/hr/students/${student.studentId}`}>
                                         <Button variant="secondary">Profile</Button>
                                     </Link>
-                                    <Button variant="primary" onClick={() => showAlertDialog('Hire Candidate', 'Contact request sent to ' + student.name)}>Hire</Button>
+                                    {/* <Button variant="primary" onClick={() => showAlertDialog('Hire Candidate', 'Contact request sent to ' + student.name)}>Hire</Button> */}
                                 </div>
                             </div>
                         ))
