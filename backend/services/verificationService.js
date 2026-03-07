@@ -14,7 +14,6 @@ const verifyRepository = async (student, owner, repo) => {
 
     // Rejection Criteria
     if (repoData.private) throw new Error('Private repositories are not supported');
-    if (repoData.size === 0) throw new Error('Repository is empty');
     if (repoData.disabled) throw new Error('Repository is disabled');
 
     // 2. Fetch Languages
@@ -85,7 +84,8 @@ const verifyRepository = async (student, owner, repo) => {
             primaryLanguage: repoData.language,
             stars: repoData.stargazers_count,
             forks: repoData.forks_count,
-            githubLink: repoData.html_url
+            githubLink: repoData.html_url,
+            size: repoData.size
         },
         totalCommitCount,
         commitCountByStudent,

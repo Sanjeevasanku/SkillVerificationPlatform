@@ -8,6 +8,25 @@ const ProjectCard = ({ project }) => {
         return 'var(--error-color)';
     };
 
+    const getVerificationBadge = () => {
+        const status = project.verificationStatus;
+        const styles = {
+            verified: { bg: 'rgba(5,118,66,0.1)', color: 'var(--success-color)', label: '✓ Verified' },
+            pending_review: { bg: 'rgba(245,158,11,0.1)', color: 'var(--warning-color)', label: '⏳ Under Review' },
+            rejected: { bg: 'rgba(204,16,22,0.1)', color: 'var(--error-color)', label: '✗ Rejected' },
+        };
+        const s = styles[status] || styles.verified;
+        return (
+            <span title={status === 'rejected' ? project.verificationReason : ''}
+                style={{
+                    padding: '3px 10px', borderRadius: '50px', fontSize: '0.72rem',
+                    fontWeight: '700', backgroundColor: s.bg, color: s.color, whiteSpace: 'nowrap'
+                }}>
+                {s.label}
+            </span>
+        );
+    };
+
     const hasSkills = project.skills && project.skills.length > 0;
 
     return (
@@ -20,7 +39,8 @@ const ProjectCard = ({ project }) => {
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--brand-color)' }}>{project.title}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    {getVerificationBadge()}
                     <span style={{
                         padding: '3px 10px', borderRadius: '50px', fontSize: '0.78rem', fontWeight: '700',
                         color: '#fff', backgroundColor: getContributionColor(project.contributionPercentage), whiteSpace: 'nowrap'

@@ -288,7 +288,7 @@ CRITICAL RULES — READ CAREFULLY:
    - Sub-libraries of a framework (group them under the parent):
      - React Router, React Query, React Hook Form, Redux Toolkit → just report "React" with higher confidence
      - Express middleware (cors, helmet, morgan) → just report "Express.js"
-     - Mongoose plugins → just report "MongoDB/Mongoose"
+     - Mongoose plugins → just report "MongoDB"
    - Generic utilities: lodash, moment, dayjs, uuid, dotenv, axios (unless axios IS the core API layer)
    - Testing frameworks should ONLY be included if testing is a MAJOR part of the project
 
@@ -369,7 +369,7 @@ function filterAndDeduplicateSkills(skills, minConfidence = 0.4) {
         'vue router': 'Vue.js', 'vue-router': 'Vue.js', 'vuex': 'Vue.js', 'pinia': 'Vue.js',
         'angular': 'Angular', 'angularjs': 'Angular',
         'express': 'Express.js', 'expressjs': 'Express.js', 'express.js': 'Express.js',
-        'mongo': 'MongoDB', 'mongodb': 'MongoDB', 'mongoose': 'MongoDB/Mongoose',
+        'mongo': 'MongoDB', 'mongodb': 'MongoDB', 'mongoose': 'MongoDB', 'mongodb/mongoose': 'MongoDB',
         'postgres': 'PostgreSQL', 'postgresql': 'PostgreSQL', 'pg': 'PostgreSQL',
         'typescript': 'TypeScript', 'ts': 'TypeScript',
         'javascript': 'JavaScript', 'js': 'JavaScript',

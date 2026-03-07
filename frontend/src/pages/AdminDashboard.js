@@ -15,6 +15,7 @@ const AdminDashboard = () => {
     const [students, setStudents] = useState([]);
     const [hrs, setHrs] = useState([]);
     const [roles, setRoles] = useState([]);
+    const [pendingReviews, setPendingReviews] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -60,14 +61,16 @@ const AdminDashboard = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [studentsRes, hrsRes, rolesRes] = await Promise.all([
+                const [studentsRes, hrsRes, rolesRes, reviewRes] = await Promise.all([
                     api.get('/admin/students'),
                     api.get('/admin/hrs'),
-                    api.get('/admin/roles')
+                    api.get('/admin/roles'),
+                    api.get('/admin/repositories/review-queue')
                 ]);
                 setStudents(studentsRes.data);
                 setHrs(hrsRes.data);
                 setRoles(rolesRes.data);
+                setPendingReviews(reviewRes.data.length);
             } catch (err) {
                 console.error('Error fetching admin data:', err);
             } finally {
@@ -211,6 +214,14 @@ const AdminDashboard = () => {
                             <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)' }}>Roles</p>
                         </div>
                     </Card>
+                    <Link to="/admin/review-queue" style={{ textDecoration: 'none' }}>
+                        <Card style={{ cursor: 'pointer', transition: 'box-shadow 0.2s' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <h3 style={{ fontSize: '2rem', color: pendingReviews > 0 ? 'var(--error-color)' : 'var(--success-color)', margin: 0 }}>{pendingReviews}</h3>
+                                <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)' }}>Pending Reviews</p>
+                            </div>
+                        </Card>
+                    </Link>
                 </div>
 
                 {/* Tabs */}

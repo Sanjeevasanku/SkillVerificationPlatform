@@ -5,6 +5,9 @@ const verificationService = require('../services/verificationService');
 const skillDetectionService = require('../services/skillDetectionService');
 const githubService = require('../services/githubService');
 const Student = require('../models/Student');
+const { calculateCommitConsistency } = require('../services/consistencyService');
+const { computeAuthorshipScore } = require('../services/authorshipService');
+const authorshipConfig = require('../config/authorshipConfig');
 
 /**
  * @desc    Verify and create repository
@@ -87,6 +90,44 @@ exports.createRepository = async (req, res) => {
             });
         }
 
+        // 5.5 Compute Authorship Score
+        // Fetch commit dates for consistency analysis
+        let consistencyResult = { consistencyScore: 0, firstCommitDate: null, lastCommitDate: null, activeWeeks: 0 };
+        try {
+            const commitDates = await githubService.fetchCommitDates(owner, repo);
+            consistencyResult = calculateCommitConsistency(commitDates);
+        } catch (err) {
+            console.warn('[Authorship] Could not fetch commit dates, using defaults:', err.message);
+        }
+
+        const { score: authorshipScore, riskBand } = computeAuthorshipScore(
+            {
+                totalCommitCount,
+                commitCountByStudent,
+                contributionPercentage,
+                repoOwnerType: repoMetadata.repoOwnerType,
+                isFork: repoMetadata.isFork,
+                sizeKB: repoMetadata.size
+            },
+            consistencyResult
+        );
+
+        // 5.6 Map riskBand → verificationStatus
+        let verificationStatus;
+        let verificationReason;
+
+        if (riskBand === 'green') {
+            verificationStatus = 'verified';
+            verificationReason = 'Auto-verified: high authorship confidence';
+        } else if (riskBand === 'red' && authorshipConfig.strictRejectMode) {
+            verificationStatus = 'rejected';
+            verificationReason = 'Auto-rejected: low authorship confidence';
+        } else {
+            // amber, or red in non-strict mode
+            verificationStatus = 'pending_review';
+            verificationReason = `Under review: ${riskBand} risk band (score: ${authorshipScore})`;
+        }
+
         // 6. Save Repository
         const newRepo = new Repository({
             student: student._id,
@@ -106,17 +147,20 @@ exports.createRepository = async (req, res) => {
             totalCommitCount,
             commitCountByStudent,
             contributionPercentage,
-            verificationStatus: 'verified'
+            authorshipScore,
+            riskBand,
+            verificationStatus,
+            verificationReason,
+            commitConsistencyScore: consistencyResult.consistencyScore,
+            firstCommitDate: consistencyResult.firstCommitDate,
+            lastCommitDate: consistencyResult.lastCommitDate,
+            activeWeeks: consistencyResult.activeWeeks
         });
-
-
 
         await newRepo.save();
 
         // 7. Trigger Skill Extraction (Async background process for immediate frontend response)
-        // We don't 'await' this so the user is redirected immediately
         skillDetectionService.detectSkills(owner, repo).then(async (detectedSkills) => {
-            // Upsert each skill into the Skill collection (keyed by student + name)
             const skillIds = await Promise.all(
                 detectedSkills.map(skill =>
                     Skill.findOneAndUpdate(
@@ -141,8 +185,13 @@ exports.createRepository = async (req, res) => {
         });
 
         res.status(201).json({
-            message: "Repository verification initiated. Analysis running in background.",
-            repositoryId: newRepo._id
+            message: verificationStatus === 'verified'
+                ? "Repository verified successfully. Skill analysis running in background."
+                : "Repository submitted for review. Skill analysis running in background.",
+            repositoryId: newRepo._id,
+            authorshipScore,
+            riskBand,
+            verificationStatus
         });
 
     } catch (err) {

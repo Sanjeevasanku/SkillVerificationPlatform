@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const HR = require('../models/HR');
 const Role = require('../models/Role');
+const Repository = require('../models/Repository');
 
 /**
  * @desc    Get all students
@@ -90,6 +91,112 @@ exports.deleteHR = async (req, res) => {
         res.json({ message: 'HR user removed' });
     } catch (err) {
         console.error('Error deleting HR:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+// ==================== REVIEW QUEUE ENDPOINTS ====================
+
+/**
+ * @desc    Get repositories pending review
+ * @route   GET /api/admin/repositories/review-queue?band=amber|red
+ * @access  Private (Admin)
+ */
+exports.getReviewQueue = async (req, res) => {
+    try {
+        const filter = { verificationStatus: 'pending_review' };
+
+        if (req.query.band && ['amber', 'red'].includes(req.query.band)) {
+            filter.riskBand = req.query.band;
+        }
+
+        const repos = await Repository.find(filter)
+            .populate('student', 'fullName email college graduationYear githubUsername')
+            .sort({ createdAt: -1 });
+
+        res.json(repos);
+    } catch (err) {
+        console.error('Error fetching review queue:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+/**
+ * @desc    Get detailed review info for a single repository
+ * @route   GET /api/admin/repositories/:id/review-details
+ * @access  Private (Admin)
+ */
+exports.getReviewDetails = async (req, res) => {
+    try {
+        const repo = await Repository.findById(req.params.id)
+            .populate('student', 'fullName email college graduationYear githubUsername githubAvatar')
+            .populate('skills');
+
+        if (!repo) {
+            return res.status(404).json({ message: 'Repository not found' });
+        }
+
+        res.json(repo);
+    } catch (err) {
+        console.error('Error fetching review details:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+/**
+ * @desc    Approve a repository
+ * @route   POST /api/admin/repositories/:id/approve
+ * @access  Private (Admin)
+ */
+exports.approveRepository = async (req, res) => {
+    try {
+        const repo = await Repository.findById(req.params.id);
+        if (!repo) {
+            return res.status(404).json({ message: 'Repository not found' });
+        }
+
+        repo.verificationStatus = 'verified';
+        repo.verificationReason = 'Manually approved by admin';
+        repo.reviewedBy = req.user.id;
+        repo.reviewedAt = new Date();
+        repo.reviewNotes = req.body.notes || '';
+
+        await repo.save();
+
+        res.json({ message: 'Repository approved', repository: repo });
+    } catch (err) {
+        console.error('Error approving repository:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+/**
+ * @desc    Reject a repository
+ * @route   POST /api/admin/repositories/:id/reject
+ * @access  Private (Admin)
+ */
+exports.rejectRepository = async (req, res) => {
+    try {
+        if (!req.body.notes) {
+            return res.status(400).json({ message: 'Rejection notes are required' });
+        }
+
+        const repo = await Repository.findById(req.params.id);
+        if (!repo) {
+            return res.status(404).json({ message: 'Repository not found' });
+        }
+
+        repo.verificationStatus = 'rejected';
+        repo.verificationReason = 'Rejected by admin: ' + req.body.notes;
+        repo.reviewedBy = req.user.id;
+        repo.reviewedAt = new Date();
+        repo.reviewNotes = req.body.notes;
+
+        await repo.save();
+
+        res.json({ message: 'Repository rejected', repository: repo });
+    } catch (err) {
+        console.error('Error rejecting repository:', err.message);
         res.status(500).json({ message: 'Server error', reason: err.message });
     }
 };

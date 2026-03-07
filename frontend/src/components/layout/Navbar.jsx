@@ -33,17 +33,30 @@ const Navbar = () => {
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             {user.role === 'admin' ? (
-                                <Link
-                                    to="/admin/dashboard"
-                                    style={{
-                                        color: isActive('/admin/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        borderBottom: isActive('/admin/dashboard') ? '2px solid var(--text-primary)' : 'none',
-                                        paddingBottom: '4px',
-                                        textDecoration: 'none'
-                                    }}
-                                >
-                                    Admin Panel
-                                </Link>
+                                <>
+                                    <Link
+                                        to="/admin/dashboard"
+                                        style={{
+                                            color: isActive('/admin/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                            borderBottom: isActive('/admin/dashboard') ? '2px solid var(--text-primary)' : 'none',
+                                            paddingBottom: '4px',
+                                            textDecoration: 'none'
+                                        }}
+                                    >
+                                        Admin Panel
+                                    </Link>
+                                    <Link
+                                        to="/admin/review-queue"
+                                        style={{
+                                            color: isActive('/admin/review-queue') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                            borderBottom: isActive('/admin/review-queue') ? '2px solid var(--text-primary)' : 'none',
+                                            paddingBottom: '4px',
+                                            textDecoration: 'none'
+                                        }}
+                                    >
+                                        Review Queue
+                                    </Link>
+                                </>
                             ) : user.role === 'hr' ? (
                                 <Link
                                     to="/hr/dashboard"

@@ -23,6 +23,8 @@
   /* Error Red */
   --success-color: #057642;
   /* Success Green */
+  --warning-color: #f59e0b;
+  /* Warning Amber */
 
   /* Spacing & Layout */
   --radius-sm: 4px;

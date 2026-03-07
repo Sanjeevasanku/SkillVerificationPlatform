@@ -65,10 +65,30 @@ const repositorySchema = new mongoose.Schema({
 
     verificationStatus: {
         type: String,
-        enum: ["verified", "rejected"]
+        enum: ["pending_review", "verified", "rejected"]
     },
 
     verificationReason: String,
+
+    authorshipScore: {
+        type: Number,
+        min: 0,
+        max: 1
+    },
+
+    riskBand: {
+        type: String,
+        enum: ["green", "amber", "red"]
+    },
+
+    reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Admin"
+    },
+
+    reviewedAt: Date,
+
+    reviewNotes: String,
 
     commitConsistencyScore: {
         type: Number,
