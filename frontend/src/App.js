@@ -15,6 +15,7 @@ const HRDashboard = lazy(() => import('./pages/HRDashboard'));
 const CreateRole = lazy(() => import('./pages/CreateRole'));
 const RoleDetails = lazy(() => import('./pages/RoleDetails'));
 const StudentProfileView = lazy(() => import('./pages/StudentProfileView'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 const LoadingFallback = () => (
   <div style={{
@@ -107,6 +108,16 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+            {/* Admin Private Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Suspense>
       </Router>
@@ -115,4 +126,3 @@ const App = () => {
 };
 
 export default App;
-

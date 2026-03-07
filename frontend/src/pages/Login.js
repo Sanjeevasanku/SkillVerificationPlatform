@@ -25,7 +25,9 @@ const Login = () => {
         }
 
         if (isAuthenticated && user) {
-            if (user.role === 'hr') {
+            if (user.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (user.role === 'hr') {
                 navigate('/hr/dashboard');
             } else {
                 navigate('/dashboard');
@@ -80,6 +82,14 @@ const Login = () => {
                     style={{ flex: 1 }}
                 >
                     HR
+                </Button>
+                <Button
+                    type="button"
+                    variant={selectedRole === 'admin' ? 'primary' : 'secondary'}
+                    onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'admin' }))}
+                    style={{ flex: 1 }}
+                >
+                    Admin
                 </Button>
             </div>
 

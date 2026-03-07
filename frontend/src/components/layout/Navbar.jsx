@@ -32,7 +32,19 @@ const Navbar = () => {
                 {user ? (
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            {user.role === 'hr' ? (
+                            {user.role === 'admin' ? (
+                                <Link
+                                    to="/admin/dashboard"
+                                    style={{
+                                        color: isActive('/admin/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                        borderBottom: isActive('/admin/dashboard') ? '2px solid var(--text-primary)' : 'none',
+                                        paddingBottom: '4px',
+                                        textDecoration: 'none'
+                                    }}
+                                >
+                                    Admin Panel
+                                </Link>
+                            ) : user.role === 'hr' ? (
                                 <Link
                                     to="/hr/dashboard"
                                     style={{

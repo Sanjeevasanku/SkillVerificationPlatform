@@ -1,5 +1,6 @@
 const Student = require('../models/Student');
 const HR = require('../models/HR');
+const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const githubService = require('../services/githubService');
@@ -218,7 +219,9 @@ exports.registerStudent = async (req, res) => {
 exports.getMe = async (req, res) => {
     try {
         let user;
-        if (req.user.role === 'hr') {
+        if (req.user.role === 'admin') {
+            user = await Admin.findById(req.user.id);
+        } else if (req.user.role === 'hr') {
             user = await HR.findById(req.user.id);
         } else {
             user = await Student.findById(req.user.id).select('-githubAccessToken');
@@ -279,6 +282,100 @@ exports.hrLogin = async (req, res) => {
         );
     } catch (err) {
         console.error('Error in HR login:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// @desc    Authenticate Admin & get token
+// @route   POST /api/auth/admin/login
+// @access  Public
+exports.adminLogin = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        let adminUser = await Admin.findOne({ email }).select('+password');
+
+        if (!adminUser) {
+            return res.status(400).json({ msg: 'Invalid Credentials' });
+        }
+
+        const isMatch = await adminUser.matchPassword(password);
+
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Invalid Credentials' });
+        }
+
+        const payload = {
+            user: {
+                id: adminUser._id,
+                role: adminUser.role // 'admin'
+            }
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' },
+            (err, token) => {
+                if (err) throw err;
+                res.json({
+                    token,
+                    user: {
+                        id: adminUser._id,
+                        fullName: adminUser.fullName,
+                        email: adminUser.email,
+                        role: adminUser.role
+                    }
+                });
+            }
+        );
+    } catch (err) {
+        console.error('Error in Admin login:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// @desc    Register a new admin
+// @route   POST /api/auth/admin/register
+// @access  Public
+exports.adminRegister = async (req, res) => {
+    const { fullName, email, password } = req.body;
+
+    try {
+        let existing = await Admin.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ msg: 'Admin with this email already exists' });
+        }
+
+        const adminUser = new Admin({ fullName, email, password });
+        await adminUser.save();
+
+        const payload = {
+            user: {
+                id: adminUser._id,
+                role: adminUser.role
+            }
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' },
+            (err, token) => {
+                if (err) throw err;
+                res.status(201).json({
+                    token,
+                    user: {
+                        id: adminUser._id,
+                        fullName: adminUser.fullName,
+                        email: adminUser.email,
+                        role: adminUser.role
+                    }
+                });
+            }
+        );
+    } catch (err) {
+        console.error('Error registering admin:', err.message);
         res.status(500).send('Server error');
     }
 };

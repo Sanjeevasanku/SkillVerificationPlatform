@@ -35,7 +35,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     // Check for Role-Based Access Control (RBAC)
     if (allowedRoles && !allowedRoles.includes(user.role)) {
         // Redirect unauthorized users to their respective home dashboards
-        const fallbackPath = user.role === 'hr' ? '/hr/dashboard' : '/dashboard';
+        const fallbackPath = user.role === 'admin' ? '/admin/dashboard' : user.role === 'hr' ? '/hr/dashboard' : '/dashboard';
         return <Navigate to={fallbackPath} replace />;
     }
 

@@ -103,7 +103,9 @@ export const AuthProvider = ({ children }) => {
     // Login User
     const login = async (formData) => {
         const { role, ...loginData } = formData;
-        const endpoint = role === 'hr' ? '/auth/hr/login' : '/auth/login';
+        let endpoint = '/auth/login';
+        if (role === 'hr') endpoint = '/auth/hr/login';
+        else if (role === 'admin') endpoint = '/auth/admin/login';
 
         try {
             const res = await api.post(endpoint, loginData);

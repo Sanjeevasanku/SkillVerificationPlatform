@@ -39,8 +39,22 @@ router.post('/hr/login', authController.hrLogin);
 router.post('/register', authController.registerStudent);
 
 /**
+ * @route   POST api/auth/admin/login
+ * @desc    Authenticate Admin & get token
+ * @access  Public
+ */
+router.post('/admin/login', authController.adminLogin);
+
+/**
+ * @route   POST api/auth/admin/register
+ * @desc    Register a new admin
+ * @access  Public
+ */
+router.post('/admin/register', authController.adminRegister);
+
+/**
  * @route   GET api/auth/me
- * @desc    Get current student
+ * @desc    Get current user (Student, HR, or Admin)
  * @access  Private
  */
 router.get('/me', authMiddleware, authController.getMe);
