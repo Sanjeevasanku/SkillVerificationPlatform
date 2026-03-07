@@ -41,19 +41,20 @@ const calculateCommitConsistency = (commitDates) => {
 
     // 4. Compute active weeks
     const activeWeeks = weekMap.size;
-    const totalWeeks = Math.ceil(durationDays / 7) || 1; // Default to 1 to avoid division by zero
 
-    // 5. Spread Factor
-    const spreadFactor = activeWeeks / totalWeeks;
+    // 5. Spread Factor (Reward 4+ active weeks, regardless of how long the gap between them was)
+    const spreadFactor = Math.min(activeWeeks / 4, 1.0);
 
-    // 6. Duration Score (Reward projects lasting >= 60 days)
-    const durationScore = Math.min(durationDays / 60, 1);
+    // 6. Duration Score (Reward projects spanning >= 30 days instead of 60 to be fairer)
+    const durationScore = Math.min(durationDays / 30, 1.0);
 
     // 7. Final Consistency Score
-    let consistencyScore = (0.6 * spreadFactor) + (0.4 * durationScore);
+    // Weight spread heavily, but if it spans over a month, give a small bonus
+    let consistencyScore = (0.8 * spreadFactor) + (0.2 * durationScore);
 
+    // If all commits were dumped in under 3 days, cap the score and penalize
     if (earlyPenalty) {
-        consistencyScore *= 0.7;
+        consistencyScore = Math.min(consistencyScore, 0.4);
     }
 
     // Clamp between 0-1

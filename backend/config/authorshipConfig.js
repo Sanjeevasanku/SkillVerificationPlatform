@@ -5,17 +5,17 @@
 module.exports = {
     // Score thresholds for risk band assignment
     thresholds: {
-        green: 0.75,   // score >= 0.75 → auto-verify
-        amber: 0.45,   // 0.45 <= score < 0.75 → manual review
-        // score < 0.45 → red (manual review in Phase A, auto-reject later)
+        green: 0.70,   // score >= 0.70 → auto-verify
+        amber: 0.40,   // 0.40 <= score < 0.70 → manual review
+        // score < 0.40 → red (manual review in Phase A, auto-reject later)
     },
 
     // Weights for the composite authorship score (must sum to 1.0)
     weights: {
-        contribution: 0.35,  // Student contribution percentage
-        consistency: 0.30,  // Commit spread & duration
-        commitDepth: 0.20,  // Student commit count depth (log-scaled)
-        repoMaturity: 0.15,  // Active weeks of development
+        contribution: 0.10,  // Student contribution percentage
+        consistency: 0.70,   // Commit spread & duration (Primary Driver)
+        commitDepth: 0.15,   // Size-adjusted commit volume
+        repoMaturity: 0.05,  // Active weeks of development
     },
 
     // Phase A: false = red goes to review queue
