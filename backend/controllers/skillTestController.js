@@ -69,11 +69,6 @@ exports.evaluateRound1 = async (req, res) => {
             });
         }
 
-        const student = await Student.findById(req.user.id);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-
         // Evaluate with Groq
         const evaluation = await groqService.evaluateAnswers(answers);
         const round1Score = evaluation.totalScore;
@@ -84,24 +79,25 @@ exports.evaluateRound1 = async (req, res) => {
             const nextEligibleDate = new Date();
             nextEligibleDate.setMonth(nextEligibleDate.getMonth() + 6);
 
-            const previousAttempts = (student.skillTestScores || []).filter(t => t.skillName === skillName).length;
-            const attempt = previousAttempts + 1;
+            // Get previous attempt count from Skill doc
+            const skillDoc = await Skill.findOne({ student: req.user.id, name: skillName });
+            const attempt = (skillDoc?.testAttempt || 0) + 1;
 
-            // Test complete — store score on student (atomic update)
-            await Student.findByIdAndUpdate(req.user.id, {
-                $push: {
-                    skillTestScores: {
-                        skillName,
-                        score: round1Score,
-                        maxScore: 4,
-                        percentage,
-                        timeTaken,
-                        attempt,
-                        takenAt: new Date(),
-                        nextEligibleDate
+            // Store score on Skill doc (atomic update)
+            await Skill.findOneAndUpdate(
+                { student: req.user.id, name: skillName },
+                {
+                    $set: {
+                        testScore: round1Score,
+                        testMaxScore: 4,
+                        testPercentage: parseFloat(percentage),
+                        testTimeTaken: timeTaken,
+                        testAttempt: attempt,
+                        testTakenAt: new Date(),
+                        testNextEligibleDate: nextEligibleDate
                     }
                 }
-            });
+            );
 
             return res.json({
                 status: 'complete',
@@ -163,19 +159,11 @@ exports.evaluateFinal = async (req, res) => {
             });
         }
 
-        const student = await Student.findById(req.user.id);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
+        // Check eligibility via Skill doc
+        const skillDoc = await Skill.findOne({ student: req.user.id, name: skillName });
 
-        const alreadyTaken = student.skillTestScores && student.skillTestScores.some(t => t.skillName === skillName);
-        // We only block here if the NEXT eligible date hasn't passed, though startTest should handle it too
-        if (alreadyTaken) {
-            const lastTest = student.skillTestScores
-                .filter(t => t.skillName === skillName)
-                .sort((a, b) => new Date(b.takenAt) - new Date(a.takenAt))[0];
-
-            if (Date.now() < new Date(lastTest.nextEligibleDate)) {
+        if (skillDoc && skillDoc.testTakenAt) {
+            if (Date.now() < new Date(skillDoc.testNextEligibleDate)) {
                 return res.status(400).json({ message: 'Test already completed recently' });
             }
         }
@@ -192,24 +180,23 @@ exports.evaluateFinal = async (req, res) => {
         const nextEligibleDate = new Date();
         nextEligibleDate.setMonth(nextEligibleDate.getMonth() + 6);
 
-        const previousAttempts = (student.skillTestScores || []).filter(t => t.skillName === skillName).length;
-        const attempt = previousAttempts + 1;
+        const attempt = (skillDoc?.testAttempt || 0) + 1;
 
-        // Store final results on student (atomic update)
-        await Student.findByIdAndUpdate(req.user.id, {
-            $push: {
-                skillTestScores: {
-                    skillName,
-                    score: totalScore,
-                    maxScore: 6,
-                    percentage,
-                    timeTaken,
-                    attempt,
-                    takenAt: new Date(),
-                    nextEligibleDate
+        // Store final results on Skill doc (atomic update)
+        await Skill.findOneAndUpdate(
+            { student: req.user.id, name: skillName },
+            {
+                $set: {
+                    testScore: totalScore,
+                    testMaxScore: 6,
+                    testPercentage: parseFloat(percentage),
+                    testTimeTaken: timeTaken,
+                    testAttempt: attempt,
+                    testTakenAt: new Date(),
+                    testNextEligibleDate: nextEligibleDate
                 }
             }
-        });
+        );
 
         res.json({
             status: 'complete',

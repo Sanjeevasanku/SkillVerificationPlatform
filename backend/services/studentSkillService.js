@@ -1,5 +1,4 @@
 const Repository = require('../models/Repository');
-const Student = require('../models/Student');
 
 /**
  * Generates a dynamic skill profile for a student by aggregating verified repository data.
@@ -7,14 +6,7 @@ const Student = require('../models/Student');
  * @returns {Promise<Object>} The aggregated skill profile.
  */
 async function generateStudentSkillProfile(studentId) {
-    // Fetch student to get test scores
-    const student = await Student.findById(studentId).lean();
-    const testScoresArray = student?.skillTestScores || [];
-    // Build lookup by skillName
-    const testScores = {};
-    testScoresArray.forEach(t => { testScores[t.skillName] = t; });
-
-    // STEP 1 – Fetch Verified Repositories
+    // STEP 1 – Fetch Verified Repositories (skills are populated from Skill collection)
     const repos = await Repository.find({
         student: studentId,
         verificationStatus: 'verified'
@@ -29,6 +21,8 @@ async function generateStudentSkillProfile(studentId) {
 
     // STEP 2 – Merge Skills Across Repositories
     const aggregation = {};
+    // Also collect the full skill doc for each name so we can read test scores
+    const skillDocsByName = {};
 
     repos.forEach(repo => {
         const contribution = (repo.contributionPercentage !== undefined && repo.contributionPercentage !== null)
@@ -47,6 +41,12 @@ async function generateStudentSkillProfile(studentId) {
             const weightedScore = skill.confidenceScore * contribution;
             aggregation[skill.name].weightedScores.push(weightedScore);
             aggregation[skill.name].totalWeight += contribution;
+
+            // Keep the most recent skill doc (by updatedAt) for test score data
+            if (!skillDocsByName[skill.name] ||
+                new Date(skill.updatedAt) > new Date(skillDocsByName[skill.name].updatedAt)) {
+                skillDocsByName[skill.name] = skill;
+            }
         });
     });
 
@@ -76,20 +76,20 @@ async function generateStudentSkillProfile(studentId) {
             level = 'Beginner';
         }
 
-        const testResult = (student.skillTestScores || [])
-            .filter(t => t.skillName === skillName)
-            .sort((a, b) => new Date(b.takenAt) - new Date(a.takenAt))[0];
+        // Read test result from the Skill doc (already populated from DB)
+        const skillDoc = skillDocsByName[skillName];
+        const hasTested = skillDoc && skillDoc.testTakenAt;
 
-        let qaScore = testResult ? testResult.percentage : null;
+        let qaScore = hasTested ? skillDoc.testPercentage : null;
         let finalSkillScore = finalConfidence;
         let validationStatus = 'not-tested';
 
-        if (testResult) {
+        if (hasTested) {
             // finalSkillScore = 0.6 * repoConfidence + 0.4 * qaScore
             finalSkillScore = (0.6 * finalConfidence) + (0.4 * qaScore);
             finalSkillScore = Math.round(finalSkillScore * 100) / 100;
 
-            if (Date.now() > new Date(testResult.nextEligibleDate)) {
+            if (Date.now() > new Date(skillDoc.testNextEligibleDate)) {
                 validationStatus = 'expired';
             } else {
                 validationStatus = 'validated';
@@ -103,14 +103,14 @@ async function generateStudentSkillProfile(studentId) {
             qaScore: qaScore,
             finalSkillScore: finalSkillScore,
             validationStatus: validationStatus,
-            lastTested: testResult ? testResult.takenAt : null,
+            lastTested: hasTested ? skillDoc.testTakenAt : null,
             // Backward compatibility
             confidence: finalSkillScore,
-            testResult: testResult ? {
-                score: testResult.score,
-                maxScore: testResult.maxScore,
-                timeTaken: testResult.timeTaken,
-                takenAt: testResult.takenAt
+            testResult: hasTested ? {
+                score: skillDoc.testScore,
+                maxScore: skillDoc.testMaxScore,
+                timeTaken: skillDoc.testTimeTaken,
+                takenAt: skillDoc.testTakenAt
             } : null
         });
     }

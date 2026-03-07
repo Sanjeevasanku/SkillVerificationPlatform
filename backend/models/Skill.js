@@ -30,7 +30,16 @@ const skillSchema = new mongoose.Schema({
         max: 1
     },
 
-    evidence: [String]
+    evidence: [String],
+
+    // Skill test score fields (moved from Student.skillTestScores)
+    testScore: { type: Number },
+    testMaxScore: { type: Number },
+    testPercentage: { type: Number },
+    testTimeTaken: { type: Number },
+    testAttempt: { type: Number, default: 0 },
+    testTakenAt: { type: Date },
+    testNextEligibleDate: { type: Date }
 }, {
     timestamps: true
 });

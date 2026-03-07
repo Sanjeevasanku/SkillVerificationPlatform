@@ -1,4 +1,4 @@
-const Student = require('../models/Student');
+const Skill = require('../models/Skill');
 
 /**
  * Checks if a student is eligible to take/retake a skill test.
@@ -7,24 +7,22 @@ const Student = require('../models/Student');
  * @throws {Error} If the student is not eligible to retake the test.
  */
 async function checkSkillTestEligibility(studentId, skillName) {
-    const student = await Student.findById(studentId);
-    if (!student) {
-        throw new Error('Student not found');
+    // Read eligibility from the Skill doc directly
+    const skillDoc = await Skill.findOne({ student: studentId, name: skillName });
+
+    if (!skillDoc) {
+        throw new Error('Skill not found');
     }
 
-    // Find latest test for that skill
-    const lastTest = (student.skillTestScores || [])
-        .filter(t => t.skillName === skillName)
-        .sort((a, b) => new Date(b.takenAt) - new Date(a.takenAt))[0];
-
-    if (!lastTest) {
-        return true; // No previous test, and startTest will handle initial claimed skill check
+    // No previous test taken for this skill
+    if (!skillDoc.testTakenAt) {
+        return true;
     }
 
-    // If previous test exists:
-    if (Date.now() < new Date(lastTest.nextEligibleDate)) {
+    // If previous test exists, check the cooldown
+    if (Date.now() < new Date(skillDoc.testNextEligibleDate)) {
         throw new Error(
-            `You can retake this test after ${lastTest.nextEligibleDate.toDateString()}`
+            `You can retake this test after ${skillDoc.testNextEligibleDate.toDateString()}`
         );
     }
 
