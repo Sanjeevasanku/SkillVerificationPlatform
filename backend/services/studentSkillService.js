@@ -18,7 +18,7 @@ async function generateStudentSkillProfile(studentId) {
     const repos = await Repository.find({
         student: studentId,
         verificationStatus: 'verified'
-    }).select('skills contributionPercentage').populate('skills').lean();
+    }).select('title description githubLink isFork repoOwnerType skills contributionPercentage').populate('skills').lean();
 
     if (!repos || repos.length === 0) {
         return {
@@ -76,13 +76,36 @@ async function generateStudentSkillProfile(studentId) {
             level = 'Beginner';
         }
 
-        const testResult = testScores[skillName] || null;
+        const testResult = (student.skillTestScores || [])
+            .filter(t => t.skillName === skillName)
+            .sort((a, b) => new Date(b.takenAt) - new Date(a.takenAt))[0];
+
+        let qaScore = testResult ? testResult.percentage : null;
+        let finalSkillScore = finalConfidence;
+        let validationStatus = 'not-tested';
+
+        if (testResult) {
+            // finalSkillScore = 0.6 * repoConfidence + 0.4 * qaScore
+            finalSkillScore = (0.6 * finalConfidence) + (0.4 * qaScore);
+            finalSkillScore = Math.round(finalSkillScore * 100) / 100;
+
+            if (Date.now() > new Date(testResult.nextEligibleDate)) {
+                validationStatus = 'expired';
+            } else {
+                validationStatus = 'validated';
+            }
+        }
 
         skillList.push({
             name: skillName,
             category: data.category,
-            confidence: finalConfidence,
-            level: level,
+            repoConfidence: finalConfidence,
+            qaScore: qaScore,
+            finalSkillScore: finalSkillScore,
+            validationStatus: validationStatus,
+            lastTested: testResult ? testResult.takenAt : null,
+            // Backward compatibility
+            confidence: finalSkillScore,
             testResult: testResult ? {
                 score: testResult.score,
                 maxScore: testResult.maxScore,
@@ -120,7 +143,8 @@ async function generateStudentSkillProfile(studentId) {
     return {
         skills: skillList,
         categorySummary: categorySummary,
-        overallStats
+        overallStats,
+        projects: repos
     };
 }
 

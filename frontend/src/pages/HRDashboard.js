@@ -176,7 +176,7 @@ const HRDashboard = () => {
                                         }}>
                                             <div>
                                                 <h4 style={{ marginBottom: '0.25rem' }}>{student.name}</h4>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
                                                     <span style={{
                                                         fontSize: '0.75rem',
                                                         fontWeight: 'bold',
@@ -187,8 +187,14 @@ const HRDashboard = () => {
                                                         padding: '2px 8px',
                                                         borderRadius: '12px'
                                                     }}>
-                                                        {student.skill.level} ({Math.round(student.skill.confidence * 100)}%)
+                                                        {student.skill.level} ({Math.round((student.skill.finalSkillScore || student.skill.confidence) * 100)}%)
                                                     </span>
+                                                    {student.skill.validationStatus === 'validated' && (
+                                                        <span style={{ fontSize: '0.7rem', color: 'var(--success-color)', fontWeight: 'bold' }}>✓ Validated</span>
+                                                    )}
+                                                    {student.skill.validationStatus === 'expired' && (
+                                                        <span style={{ fontSize: '0.7rem', color: 'var(--error-color)', fontWeight: 'bold' }}>! Expired</span>
+                                                    )}
                                                 </div>
                                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                                     {student.college} • Batch of {student.graduationYear}
@@ -263,7 +269,7 @@ const HRDashboard = () => {
                                     onMouseLeave={(e) => e.target.style.opacity = 0.7}
                                     title="Delete Role"
                                 >
-                                   Delete 
+                                    Delete
                                 </button>
                                 <div style={{ marginTop: '10px' }}> {/* Margin to avoid overlapping with delete button */}
                                     <h3 style={{ marginBottom: '0.5rem', paddingRight: '25px' }}>{role.title}</h3>

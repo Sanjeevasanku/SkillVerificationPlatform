@@ -72,15 +72,11 @@ exports.generateQuestions = async (skills, round = 1, previousQuestions = []) =>
     if (round === 1) {
         prompt = `You are a strict technical interviewer. A student claims proficiency in these skills: ${skillList}.
 
-Generate exactly 4 FILL-IN-THE-BLANK technical questions. Each question must be a statement with exactly one blank represented by "___" (three underscores) that the student must fill in.
+Generate exactly 4 EASY technical questions. Each question must be a statement with exactly one blank represented by "___" (three underscores) that the student must fill in.
 
 Rules:
-1. Spread questions across different skills. Harder difficulties target skills with HIGHER confidence scores.
-2. Difficulty levels in order:
-   - Q1 EASY: Basic fact/definition blank (e.g. "In React, ___ is the hook used to manage component-level state."  answer: useState)
-   - Q2 MEDIUM: Applied knowledge blank (e.g. "In Express, the ___ method is used to register middleware."  answer: use)
-   - Q3 HARD: Deep technical blank (e.g. "In Node.js, the ___ phase of the event loop handles I/O callbacks."  answer: poll)
-   - Q4 HELL: Expert-level blank that only someone who actually used the tech would know
+1. Spread questions across different skills.
+2. Difficulty levels: All 4 questions must be EASY: Basic fact/definition blank (e.g. "In React, ___ is the hook used to manage component-level state."  answer: useState).
 3. The correct answer MUST be a SINGLE function name, method name, hook name, keyword, or technical term. NO parentheses, NO phrases, NO multiple words. Just the bare name.
 4. The statement around the blank must provide enough context to determine the answer without ambiguity.
 
@@ -88,9 +84,9 @@ Respond ONLY with valid JSON:
 {
   "questions": [
     { "id": 1, "difficulty": "easy", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
-    { "id": 2, "difficulty": "medium", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
-    { "id": 3, "difficulty": "hard", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
-    { "id": 4, "difficulty": "hell", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" }
+    { "id": 2, "difficulty": "easy", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
+    { "id": 3, "difficulty": "easy", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
+    { "id": 4, "difficulty": "easy", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" }
   ]
 }`;
     } else {
@@ -101,20 +97,20 @@ Respond ONLY with valid JSON:
 The following 4 questions were already asked in round 1 — DO NOT repeat the same topics or concepts:
 ${prevBlock}
 
-Generate exactly 2 EXPERT-LEVEL fill-in-the-blank questions. Each must be a statement with one "___" blank.
+Generate exactly 2 MEDIUM-LEVEL fill-in-the-blank questions. Each must be a statement with one "___" blank.
 
 Rules:
 1. Target the most complex skills
-2. These should test deep internals, edge cases, or advanced concepts
+2. These should test practical usage or slightly more advanced concepts, but not internals or edge cases.
 3. The correct answer MUST be a SINGLE function name, method name, keyword, or technical term. NO parentheses, NO phrases. Just the bare name.
-4. Significantly harder than the initial round
+4. Slightly harder than the initial round but still accessible.
 5. Must cover DIFFERENT topics from the round 1 questions listed above
 
 Respond ONLY with valid JSON:
 {
   "questions": [
-    { "id": 5, "difficulty": "expert", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
-    { "id": 6, "difficulty": "expert", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" }
+    { "id": 5, "difficulty": "medium", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" },
+    { "id": 6, "difficulty": "medium", "skill": "<skill>", "question": "<statement with ___ blank>", "correctAnswer": "<expected answer>" }
   ]
 }`;
     }

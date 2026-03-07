@@ -1,6 +1,7 @@
 const Skill = require('../models/Skill');
 const Student = require('../models/Student');
 const groqService = require('../services/groqService');
+const { checkSkillTestEligibility } = require('../services/skillTestService');
 
 /**
  * @desc    Start a skill test — generates round 1 questions for a single skill
@@ -16,19 +17,8 @@ exports.startTest = async (req, res) => {
             return res.status(400).json({ message: 'Skill name is required' });
         }
 
-        // Check if test already taken for this skill
-        const student = await Student.findById(studentId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-
-        const alreadyTaken = student.skillTestScores && student.skillTestScores.some(t => t.skillName === skillName);
-        if (alreadyTaken) {
-            return res.status(400).json({
-                message: 'Test already taken',
-                reason: `You have already completed the skill test for "${skillName}"`
-            });
-        }
+        // Check eligibility (covers 6-month retake and general availability)
+        await checkSkillTestEligibility(studentId, skillName);
 
         // Find the student's skill documents matching this name
         const skills = await Skill.find({ student: studentId, name: skillName });
@@ -84,31 +74,34 @@ exports.evaluateRound1 = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        const alreadyTaken = student.skillTestScores && student.skillTestScores.some(t => t.skillName === skillName);
-        if (alreadyTaken) {
-            return res.status(400).json({ message: 'Test already completed' });
-        }
-
         // Evaluate with Groq
         const evaluation = await groqService.evaluateAnswers(answers);
         const round1Score = evaluation.totalScore;
 
         if (round1Score < 2) {
-            // Test complete — store score on student (atomic push to avoid validation issues)
-            await Student.updateOne(
-                { _id: req.user.id },
-                {
-                    $push: {
-                        skillTestScores: {
-                            skillName,
-                            score: round1Score,
-                            maxScore: 4,
-                            timeTaken,
-                            takenAt: new Date()
-                        }
+            // Calculate metadata
+            const percentage = (round1Score / 4).toFixed(2);
+            const nextEligibleDate = new Date();
+            nextEligibleDate.setMonth(nextEligibleDate.getMonth() + 6);
+
+            const previousAttempts = (student.skillTestScores || []).filter(t => t.skillName === skillName).length;
+            const attempt = previousAttempts + 1;
+
+            // Test complete — store score on student (atomic update)
+            await Student.findByIdAndUpdate(req.user.id, {
+                $push: {
+                    skillTestScores: {
+                        skillName,
+                        score: round1Score,
+                        maxScore: 4,
+                        percentage,
+                        timeTaken,
+                        attempt,
+                        takenAt: new Date(),
+                        nextEligibleDate
                     }
                 }
-            );
+            });
 
             return res.json({
                 status: 'complete',
@@ -176,8 +169,15 @@ exports.evaluateFinal = async (req, res) => {
         }
 
         const alreadyTaken = student.skillTestScores && student.skillTestScores.some(t => t.skillName === skillName);
+        // We only block here if the NEXT eligible date hasn't passed, though startTest should handle it too
         if (alreadyTaken) {
-            return res.status(400).json({ message: 'Test already completed' });
+            const lastTest = student.skillTestScores
+                .filter(t => t.skillName === skillName)
+                .sort((a, b) => new Date(b.takenAt) - new Date(a.takenAt))[0];
+
+            if (Date.now() < new Date(lastTest.nextEligibleDate)) {
+                return res.status(400).json({ message: 'Test already completed recently' });
+            }
         }
 
         // Evaluate round 2 with Groq
@@ -187,21 +187,29 @@ exports.evaluateFinal = async (req, res) => {
         // Calculate combined score
         const totalScore = round1Score + round2Score;
 
-        // Store final results on student (atomic push to avoid validation issues)
-        await Student.updateOne(
-            { _id: req.user.id },
-            {
-                $push: {
-                    skillTestScores: {
-                        skillName,
-                        score: totalScore,
-                        maxScore: 6,
-                        timeTaken,
-                        takenAt: new Date()
-                    }
+        // Calculate metadata
+        const percentage = (totalScore / 6).toFixed(2);
+        const nextEligibleDate = new Date();
+        nextEligibleDate.setMonth(nextEligibleDate.getMonth() + 6);
+
+        const previousAttempts = (student.skillTestScores || []).filter(t => t.skillName === skillName).length;
+        const attempt = previousAttempts + 1;
+
+        // Store final results on student (atomic update)
+        await Student.findByIdAndUpdate(req.user.id, {
+            $push: {
+                skillTestScores: {
+                    skillName,
+                    score: totalScore,
+                    maxScore: 6,
+                    percentage,
+                    timeTaken,
+                    attempt,
+                    takenAt: new Date(),
+                    nextEligibleDate
                 }
             }
-        );
+        });
 
         res.json({
             status: 'complete',

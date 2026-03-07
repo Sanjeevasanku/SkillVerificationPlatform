@@ -38,10 +38,7 @@ const SkillProfile = ({ skills, categorySummary, loading, onTestClick }) => {
                     {skills.map((skill, index) => (
                         <SkillBar
                             key={index}
-                            name={skill.name}
-                            confidence={skill.confidence}
-                            level={skill.level}
-                            testResult={skill.testResult}
+                            {...skill}
                             onTestClick={onTestClick}
                         />
                     ))}

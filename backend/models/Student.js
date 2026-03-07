@@ -85,8 +85,11 @@ const StudentSchema = new mongoose.Schema({
         skillName: { type: String, required: true },
         score: { type: Number, required: true },
         maxScore: { type: Number, required: true },
+        percentage: { type: Number },
         timeTaken: { type: Number },
-        takenAt: { type: Date, default: Date.now }
+        attempt: { type: Number, default: 1 },
+        takenAt: { type: Date, default: Date.now },
+        nextEligibleDate: { type: Date }
     }],
 
 }, {
