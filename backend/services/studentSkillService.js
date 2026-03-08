@@ -10,7 +10,7 @@ async function generateStudentSkillProfile(studentId) {
     const repos = await Repository.find({
         student: studentId,
         verificationStatus: 'verified'
-    }).select('title description githubLink isFork repoOwnerType skills contributionPercentage').populate('skills').lean();
+    }).select('title description githubLink isFork repoOwnerType skills contributionPercentage verificationStatus verificationReason commitCountByStudent totalCommitCount activeWeeks primaryLanguage stars forks authorshipScore commitConsistencyScore riskBand').populate('skills').lean();
 
     if (!repos || repos.length === 0) {
         return {

@@ -2,38 +2,26 @@ import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
-import { AlertDialog, ConfirmDialog } from '../components/common/Dialog';
+import { ConfirmDialog } from '../components/common/Dialog';
 import Input from '../components/common/Input';
 
 const BAND_FILTERS = ['all', 'amber', 'red'];
 
-const bandBadgeStyle = (band) => {
-    const colors = {
-        green: { bg: 'rgba(5, 118, 66, 0.1)', color: 'var(--success-color)' },
-        amber: { bg: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning-color)' },
-        red: { bg: 'rgba(204, 16, 22, 0.1)', color: 'var(--error-color)' }
-    };
-    const c = colors[band] || colors.amber;
-    return {
-        display: 'inline-block',
-        padding: '3px 10px',
-        borderRadius: '50px',
-        fontSize: '0.78rem',
-        fontWeight: '700',
-        backgroundColor: c.bg,
-        color: c.color,
-        textTransform: 'uppercase'
-    };
+const bandColors = {
+    green: { bg: 'rgba(5, 118, 66, 0.1)', color: '#05763e', border: '#05763e' },
+    amber: { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706', border: '#d97706' },
+    red: { bg: 'rgba(204, 16, 22, 0.1)', color: '#cc1016', border: '#cc1016' }
 };
 
 const ReviewQueue = () => {
     const [repos, setRepos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeBand, setActiveBand] = useState('all');
+    const [expandedId, setExpandedId] = useState(null);
 
     // Dialog state
     const [dialog, setDialog] = useState({
-        isOpen: false, type: 'alert', title: '', message: '',
+        isOpen: false, type: 'confirm', title: '', message: '',
         onConfirm: () => { }, confirmText: 'OK', variant: 'primary'
     });
     const closeDialog = () => setDialog(prev => ({ ...prev, isOpen: false }));
@@ -98,122 +86,286 @@ const ReviewQueue = () => {
         }
     };
 
-    const tabStyle = (band) => ({
-        padding: '0.5rem 1.25rem',
+    const toggleExpand = (id) => {
+        setExpandedId(prev => prev === id ? null : id);
+    };
+
+    // ─── Filter tab pill styles ───
+    const filterPillStyle = (band) => ({
+        padding: '0.45rem 1.1rem',
         border: 'none',
         cursor: 'pointer',
         fontWeight: activeBand === band ? '700' : '500',
-        fontSize: '0.9rem',
-        background: activeBand === band ? 'var(--bg-secondary)' : 'transparent',
-        color: activeBand === band ? 'var(--brand-color)' : 'var(--text-secondary)',
-        borderBottom: activeBand === band ? '2px solid var(--brand-color)' : '2px solid transparent',
-        borderRadius: '8px 8px 0 0',
+        fontSize: '0.88rem',
+        background: activeBand === band ? 'var(--brand-color)' : 'transparent',
+        color: activeBand === band ? '#fff' : 'var(--text-secondary)',
+        borderRadius: '50px',
         textTransform: 'capitalize',
-        transition: 'all 0.2s ease'
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.4rem'
     });
 
-    const thStyle = {
-        textAlign: 'left', padding: '0.75rem 1rem',
-        borderBottom: '1px solid var(--border-color)',
-        color: 'var(--text-secondary)', fontSize: '0.8rem',
-        fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em'
+    const dotStyle = (color) => ({
+        width: '8px',
+        height: '8px',
+        borderRadius: '50%',
+        background: color,
+        display: 'inline-block'
+    });
+
+    // ─── Score box in expanded area ───
+    const scoreBoxStyle = {
+        background: 'var(--bg-primary)',
+        borderRadius: '10px',
+        padding: '0.9rem 1rem',
+        textAlign: 'center',
+        minWidth: '120px',
+        flex: '1'
     };
 
-    const tdStyle = {
-        padding: '0.75rem 1rem',
-        borderBottom: '1px solid var(--border-color)',
-        fontSize: '0.9rem'
+    const scoreValueStyle = {
+        fontSize: '1.35rem',
+        fontWeight: '700',
+        color: 'var(--text-primary)',
+        marginBottom: '0.25rem'
+    };
+
+    const scoreLabelStyle = {
+        fontSize: '0.72rem',
+        color: 'var(--text-secondary)',
+        fontWeight: '500'
     };
 
     return (
         <Layout>
-            <div style={{ padding: '2rem' }}>
-                <div style={{ marginBottom: '2rem' }}>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Review Queue</h1>
-                    <p style={{ color: 'var(--text-secondary)' }}>
-                        Repositories flagged for manual review based on authorship scoring.
+            <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
+                {/* Header */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <h1 style={{ fontSize: '2rem', marginBottom: '0.4rem', fontWeight: '800' }}>Review Queue</h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                        Review repositories flagged for manual verification. {repos.length} pending.
                     </p>
                 </div>
 
-                {/* Band filter tabs */}
-                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-                    {BAND_FILTERS.map(b => (
-                        <button key={b} style={tabStyle(b)} onClick={() => setActiveBand(b)}>
-                            {b === 'all' ? `All (${repos.length})` : b}
-                        </button>
-                    ))}
+                {/* Band filter pills */}
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <button style={filterPillStyle('all')} onClick={() => setActiveBand('all')}>
+                        All Pending
+                    </button>
+                    <button style={filterPillStyle('red')} onClick={() => setActiveBand('red')}>
+                        <span style={dotStyle('#cc1016')} /> High 
+                    </button>
+                    <button style={filterPillStyle('amber')} onClick={() => setActiveBand('amber')}>
+                        <span style={dotStyle('#d97706')} /> Medium 
+                    </button>
                 </div>
 
-                {/* Table */}
+                {/* Cards */}
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '3rem' }}><div className="loader"></div></div>
                 ) : repos.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-                        <p style={{ color: 'var(--text-secondary)' }}>🎉 No repositories pending review!</p>
+                        <p style={{ color: 'var(--text-secondary)' }}> No repositories pending review!</p>
                     </div>
                 ) : (
-                    <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
-                            <thead>
-                                <tr>
-                                    <th style={thStyle}>Student</th>
-                                    <th style={thStyle}>Repository</th>
-                                    <th style={thStyle}>Score</th>
-                                    <th style={thStyle}>Band</th>
-                                    <th style={thStyle}>Contribution</th>
-                                    <th style={thStyle}>Reason</th>
-                                    <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {repos.map(repo => (
-                                    <tr key={repo._id}
-                                        style={{ transition: 'background 0.15s' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-primary)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        <td style={tdStyle}>
-                                            <strong>{repo.student?.fullName || 'Unknown'}</strong>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                                {repo.student?.email}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {repos.map(repo => {
+                            const isExpanded = expandedId === repo._id;
+                            const bc = bandColors[repo.riskBand] || bandColors.amber;
+                            const scorePercent = ((repo.authorshipScore || 0) * 100).toFixed(0);
+
+                            // Compute individual signal scores for display
+                            const contributionScore = Math.min((repo.contributionPercentage || 0), 100);
+                            const commitVolume = repo.commitCountByStudent || 0;
+                            const totalCommits = repo.totalCommitCount || 0;
+                            const commitVolumeScore = totalCommits > 0 ? Math.round((commitVolume / totalCommits) * 100) : 0;
+                            const consistencyScore = Math.round((repo.commitConsistencyScore || 0) * 100);
+                            const ownershipScore = repo.repoOwnerType === 'User' && !repo.isFork ? 100 : 0;
+                            const maturityScore = Math.min(Math.round(((repo.activeWeeks || 0) / 8) * 100), 100);
+
+                            return (
+                                <div key={repo._id} style={{
+                                    background: 'var(--bg-secondary)',
+                                    borderRadius: '12px',
+                                    borderLeft: `4px solid ${bc.border}`,
+                                    border: `1px solid var(--border-color)`,
+                                    borderLeftWidth: '4px',
+                                    borderLeftColor: bc.border,
+                                    overflow: 'hidden',
+                                    transition: 'box-shadow 0.2s ease'
+                                }}>
+                                    {/* ─── Collapsed header ─── */}
+                                    <div style={{
+                                        padding: '1.1rem 1.25rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '1rem',
+                                        flexWrap: 'wrap'
+                                    }}>
+                                        {/* Left: title + badge + student info */}
+                                        <div style={{ flex: '1', minWidth: '200px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                                                <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>
+                                                    {repo.title}
+                                                </span>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    padding: '2px 10px',
+                                                    borderRadius: '50px',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: '700',
+                                                    backgroundColor: bc.bg,
+                                                    color: bc.color,
+                                                    textTransform: 'capitalize'
+                                                }}>
+                                                    {repo.riskBand} — {scorePercent}%
+                                                </span>
                                             </div>
-                                        </td>
-                                        <td style={tdStyle}>
-                                            <a href={repo.githubLink} target="_blank" rel="noreferrer"
-                                                style={{ color: 'var(--brand-color)', fontWeight: '600' }}>
-                                                {repo.title}
-                                            </a>
-                                        </td>
-                                        <td style={tdStyle}>
-                                            <strong>{(repo.authorshipScore * 100).toFixed(0)}%</strong>
-                                        </td>
-                                        <td style={tdStyle}>
-                                            <span style={bandBadgeStyle(repo.riskBand)}>{repo.riskBand}</span>
-                                        </td>
-                                        <td style={tdStyle}>
-                                            {repo.contributionPercentage}%
-                                        </td>
-                                        <td style={{ ...tdStyle, maxWidth: '200px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                            {repo.verificationReason}
-                                        </td>
-                                        <td style={{ ...tdStyle, textAlign: 'center' }}>
-                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                <Button variant="primary"
-                                                    style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}
-                                                    onClick={() => handleApprove(repo._id)}>
-                                                    Approve
-                                                </Button>
-                                                <Button variant="ghost"
-                                                    style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', color: 'var(--error-color)' }}
-                                                    onClick={() => openRejectModal(repo._id)}>
-                                                    Reject
-                                                </Button>
+                                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                                {repo.student?.fullName || 'Unknown'} • {repo.student?.college || ''} • Batch {repo.student?.graduationYear || ''}
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', fontStyle: 'italic' }}>
+                                                {repo.verificationReason || 'Queued for manual review'}
+                                            </div>
+                                        </div>
+
+                                        {/* Right: actions */}
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                                            <button
+                                                onClick={() => toggleExpand(repo._id)}
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: '1px solid var(--border-color)',
+                                                    borderRadius: '6px',
+                                                    padding: '0.35rem 0.85rem',
+                                                    fontSize: '0.82rem',
+                                                    cursor: 'pointer',
+                                                    color: 'var(--text-primary)',
+                                                    fontWeight: '500',
+                                                    transition: 'background 0.15s'
+                                                }}
+                                            >
+                                                {isExpanded ? 'Hide Details' : 'Details'}
+                                            </button>
+                                            <Button variant="primary"
+                                                style={{ padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}
+                                                onClick={() => handleApprove(repo._id)}>
+                                                ✓ Approve
+                                            </Button>
+                                            <Button variant="ghost"
+                                                style={{
+                                                    padding: '0.35rem 0.9rem', fontSize: '0.82rem',
+                                                    color: 'var(--error-color)', border: '1px solid var(--error-color)',
+                                                    borderRadius: '6px'
+                                                }}
+                                                onClick={() => openRejectModal(repo._id)}>
+                                                ✕ Reject
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* ─── Expanded details ─── */}
+                                    {isExpanded && (
+                                        <div style={{
+                                            borderTop: '1px solid var(--border-color)',
+                                            padding: '1.25rem',
+                                            animation: 'fadeIn 0.2s ease'
+                                        }}>
+                                            {/* Score Breakdown */}
+                                            <h4 style={{
+                                                fontSize: '0.78rem',
+                                                fontWeight: '700',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.06em',
+                                                color: 'var(--text-secondary)',
+                                                marginBottom: '0.75rem'
+                                            }}>
+                                                Score Breakdown
+                                            </h4>
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: '0.75rem',
+                                                flexWrap: 'wrap',
+                                                marginBottom: '1.25rem'
+                                            }}>
+                                                <div style={scoreBoxStyle}>
+                                                    <div style={scoreValueStyle}>{contributionScore}%</div>
+                                                    <div style={scoreLabelStyle}>Contribution Score</div>
+                                                </div>
+                                                <div style={scoreBoxStyle}>
+                                                    <div style={scoreValueStyle}>{commitVolumeScore}%</div>
+                                                    <div style={scoreLabelStyle}>Commit Volume Score</div>
+                                                </div>
+                                                <div style={scoreBoxStyle}>
+                                                    <div style={scoreValueStyle}>{consistencyScore}%</div>
+                                                    <div style={scoreLabelStyle}>Consistency Score</div>
+                                                </div>
+                                                <div style={scoreBoxStyle}>
+                                                    <div style={scoreValueStyle}>{ownershipScore}%</div>
+                                                    <div style={scoreLabelStyle}>Ownership Score</div>
+                                                </div>
+                                                <div style={scoreBoxStyle}>
+                                                    <div style={scoreValueStyle}>{maturityScore}%</div>
+                                                    <div style={scoreLabelStyle}>Maturity Score</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Stats row */}
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: '2rem',
+                                                flexWrap: 'wrap',
+                                                fontSize: '0.88rem',
+                                                marginBottom: '1rem'
+                                            }}>
+                                                <div>
+                                                    <strong>Contribution:</strong> {contributionScore}%
+                                                </div>
+                                                <div>
+                                                    <strong>Commits (student):</strong> {commitVolume}
+                                                </div>
+                                                <div>
+                                                    <strong>Commits (total):</strong> {totalCommits}
+                                                </div>
+                                                <div>
+                                                    <strong>Language:</strong> {repo.primaryLanguage || '—'}
+                                                </div>
+                                            </div>
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: '2rem',
+                                                flexWrap: 'wrap',
+                                                fontSize: '0.88rem',
+                                                marginBottom: '1rem'
+                                            }}>
+                                                <div>
+                                                    <strong>Stars:</strong> {repo.stars ?? 0} &nbsp; <strong>Forks:</strong> {repo.forks ?? 0}
+                                                </div>
+                                                <div>
+                                                    <strong>Active weeks:</strong> {repo.activeWeeks ?? 0}
+                                                </div>
+                                            </div>
+
+                                            {/* GitHub link */}
+                                            {repo.githubLink && (
+                                                <a href={repo.githubLink} target="_blank" rel="noreferrer"
+                                                    style={{
+                                                        color: 'var(--brand-color)',
+                                                        fontSize: '0.88rem',
+                                                        fontWeight: '600',
+                                                        textDecoration: 'none'
+                                                    }}>
+                                                    View on GitHub ↗
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 

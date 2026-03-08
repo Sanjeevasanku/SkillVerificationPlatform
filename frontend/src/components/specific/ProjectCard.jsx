@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Card from '../common/Card';
 
 const ProjectCard = ({ project }) => {
+    const [expanded, setExpanded] = useState(false);
+
     const getContributionColor = (percent) => {
         if (percent >= 70) return 'var(--success-color)';
         if (percent >= 30) return '#eab308';
@@ -29,13 +31,30 @@ const ProjectCard = ({ project }) => {
 
     const hasSkills = project.skills && project.skills.length > 0;
 
+    // Compute displayable stats
+    const consistencyScore = project.commitConsistencyScore != null
+        ? Math.round(project.commitConsistencyScore * 100) : null;
+    const authorshipPercent = project.authorshipScore != null
+        ? Math.round(project.authorshipScore * 100) : null;
+
+    const statItem = (label, value) => (
+        <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            padding: '0.35rem 0',
+            fontSize: '0.84rem'
+        }}>
+            <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+            <span style={{ fontWeight: '600' }}>{value}</span>
+        </div>
+    );
+
     return (
         <Card className="project-card" style={{
-            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            height: expanded ? 'auto' : '500px'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--brand-color)' }}>{project.title}</h3>
@@ -114,7 +133,76 @@ const ProjectCard = ({ project }) => {
                 )}
             </div>
 
-            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            {/* ─── Expandable details section ─── */}
+            {expanded && (
+                <div style={{
+                    marginBottom: '1rem',
+                    padding: '0.75rem',
+                    background: 'var(--bg-primary)',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    animation: 'fadeIn 0.2s ease'
+                }}>
+                    <h4 style={{
+                        fontSize: '0.72rem', textTransform: 'uppercase',
+                        color: 'var(--text-secondary)', letterSpacing: '0.05em',
+                        marginBottom: '0.5rem', fontWeight: '700'
+                    }}>
+                        Repository Details
+                    </h4>
+                    {statItem('Commits (student)', project.commitCountByStudent ?? '—')}
+                    {statItem('Commits (total)', project.totalCommitCount ?? '—')}
+                    {statItem('Contribution', `${project.contributionPercentage ?? 0}%`)}
+                    {authorshipPercent != null && statItem('Authorship Score', `${authorshipPercent}%`)}
+                    {consistencyScore != null && statItem('Consistency Score', `${consistencyScore}%`)}
+                    {statItem('Stars', project.stars ?? 0)}
+                    {statItem('Forks', project.forks ?? 0)}
+                    {statItem('Active Weeks', project.activeWeeks ?? '—')}
+                    {statItem('Primary Language', project.primaryLanguage || '—')}
+                    {project.riskBand && statItem('Risk Band', (
+                        <span style={{
+                            padding: '1px 8px', borderRadius: '50px', fontSize: '0.72rem',
+                            fontWeight: '700', textTransform: 'capitalize',
+                            backgroundColor: project.riskBand === 'green' ? 'rgba(5,118,66,0.1)' :
+                                project.riskBand === 'amber' ? 'rgba(245,158,11,0.1)' : 'rgba(204,16,22,0.1)',
+                            color: project.riskBand === 'green' ? '#05763e' :
+                                project.riskBand === 'amber' ? '#d97706' : '#cc1016'
+                        }}>
+                            {project.riskBand}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            <div style={{
+                marginTop: 'auto',
+                paddingTop: '1rem', borderTop: '1px solid var(--border-color)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+                {/* Down arrow toggle */}
+                <button
+                    onClick={() => setExpanded(!expanded)}
+                    style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '0.35rem',
+                        color: 'var(--text-secondary)', fontSize: '0.82rem',
+                        fontWeight: '500', padding: '0.2rem 0',
+                        transition: 'color 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                    <span style={{
+                        display: 'inline-block',
+                        transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease',
+                        fontSize: '0.9rem'
+                    }}>
+                        ▼
+                    </span>
+                    {expanded ? 'Less' : 'More'}
+                </button>
+
                 <a
                     href={project.githubLink}
                     target="_blank"

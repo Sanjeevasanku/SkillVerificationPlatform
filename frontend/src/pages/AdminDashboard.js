@@ -298,7 +298,7 @@ const AdminDashboard = () => {
                                                 </td>
                                                 <td style={{ ...tableCellStyle, textAlign: 'center' }}>
                                                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                        <Link to={`/hr/students/${student._id}`}>
+                                                        <Link to={`/admin/students/${student._id}`}>
                                                             <Button variant="secondary" style={{ padding: '0.3rem 0.7rem', fontSize: '0.8rem' }}>View</Button>
                                                         </Link>
                                                         <Button variant="ghost" style={{ padding: '0.3rem 0.7rem', fontSize: '0.8rem', color: 'var(--error-color)' }}

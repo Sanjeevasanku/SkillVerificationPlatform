@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Card from '../components/common/Card';
@@ -8,6 +8,9 @@ import ProjectCard from '../components/specific/ProjectCard';
 
 const StudentProfileView = () => {
     const { studentId } = useParams();
+    const location = useLocation();
+    const isAdmin = location.pathname.startsWith('/admin/');
+    const backLink = isAdmin ? '/admin/dashboard' : '/hr/dashboard';
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -44,7 +47,7 @@ const StudentProfileView = () => {
                 <div className="flex-center" style={{ height: '50vh', flexDirection: 'column', gap: '1rem' }}>
                     <h2 style={{ color: 'var(--error-color)' }}>Error</h2>
                     <p>{error || 'Profile not found'}</p>
-                    <Link to="/hr/dashboard">
+                    <Link to={backLink}>
                         <button className="btn btn-secondary">Back to Dashboard</button>
                     </Link>
                 </div>
@@ -57,7 +60,7 @@ const StudentProfileView = () => {
     return (
         <Layout>
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '1rem' }}>
-                <Link to="/hr/dashboard" style={{ color: 'var(--brand-color)', textDecoration: 'none', display: 'inline-block', marginBottom: '1.5rem' }}>
+                <Link to={backLink} style={{ color: 'var(--brand-color)', textDecoration: 'none', display: 'inline-block', marginBottom: '1.5rem' }}>
                     ← Back to Dashboard
                 </Link>
 
@@ -111,7 +114,8 @@ const StudentProfileView = () => {
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                            gap: '1.5rem'
+                            gap: '1.5rem',
+                            alignItems: 'start'
                         }}>
                             {projects.map(project => (
                                 <ProjectCard

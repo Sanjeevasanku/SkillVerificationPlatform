@@ -112,6 +112,14 @@ const App = () => {
 
             {/* Admin Private Routes */}
             <Route
+              path="/admin/students/:studentId"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <StudentProfileView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>

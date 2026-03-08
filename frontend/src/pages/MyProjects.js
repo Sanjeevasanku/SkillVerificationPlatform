@@ -44,7 +44,8 @@ const MyProjects = () => {
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                gap: '1.5rem'
+                gap: '1.5rem',
+                alignItems: 'start'
             }}>
                 {projects && projects.length > 0 ? (
                     projects.map(project => (
