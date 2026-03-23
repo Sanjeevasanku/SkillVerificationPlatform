@@ -123,7 +123,7 @@ const AdminDashboard = () => {
             'Are you sure you want to delete this role? This action cannot be undone.',
             async () => {
                 try {
-                    await api.delete(`/hr/roles/${id}`);
+                    await api.delete(`/admin/roles/${id}`);
                     setRoles(roles.filter(r => r._id !== id));
                 } catch (err) {
                     console.error('Error deleting role:', err);
@@ -420,7 +420,7 @@ const AdminDashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <Link to={`/hr/roles/${role._id}`} style={{ width: '100%' }}>
+                                        <Link to={`/admin/roles/${role._id}`} style={{ width: '100%' }}>
                                             <Button variant="secondary" style={{ width: '100%' }}>View Rankings</Button>
                                         </Link>
                                     </div>

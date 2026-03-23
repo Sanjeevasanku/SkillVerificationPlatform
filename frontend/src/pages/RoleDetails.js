@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
@@ -9,6 +10,12 @@ import { AlertDialog } from '../components/common/Dialog';
 
 const RoleDetails = () => {
     const { roleId } = useParams();
+    const { user } = useContext(AuthContext);
+    const location = useLocation();
+    const isAdminRoute = location.pathname.startsWith('/admin');
+    const apiBase = isAdminRoute ? '/admin' : '/hr';
+    const dashboardPath = isAdminRoute ? '/admin/dashboard' : '/hr/dashboard';
+    const studentBasePath = isAdminRoute ? '/admin/students' : '/hr/students';
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '' });
@@ -19,7 +26,7 @@ const RoleDetails = () => {
     useEffect(() => {
         const fetchRoleDetails = async () => {
             try {
-                const res = await api.get(`/hr/roles/${roleId}`);
+                const res = await api.get(`${apiBase}/roles/${roleId}`);
                 setData(res.data);
                 setLoading(false);
             } catch (err) {
@@ -39,7 +46,7 @@ const RoleDetails = () => {
     return (
         <Layout>
             <div style={{ padding: '2rem' }}>
-                <Link to="/hr/dashboard" style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'inline-block' }}>← Back to Dashboard</Link>
+                <Link to={dashboardPath} style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'inline-block' }}>← Back to Dashboard</Link>
 
                 <div style={{ marginBottom: '3rem' }}>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{role.title}</h1>
@@ -151,7 +158,7 @@ const RoleDetails = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <Link to={`/hr/students/${student.studentId}`}>
+                                    <Link to={`${studentBasePath}/${student.studentId}`}>
                                         <Button variant="secondary">Profile</Button>
                                     </Link>
                                     {/* <Button variant="primary" onClick={() => showAlertDialog('Hire Candidate', 'Contact request sent to ' + student.name)}>Hire</Button> */}

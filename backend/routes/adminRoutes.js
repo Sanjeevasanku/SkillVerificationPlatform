@@ -10,6 +10,8 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 router.get('/students', [auth, adminMiddleware], adminController.getAllStudents);
 router.get('/hrs', [auth, adminMiddleware], adminController.getAllHRs);
 router.get('/roles', [auth, adminMiddleware], adminController.getAllRoles);
+router.get('/roles/:id', [auth, adminMiddleware], adminController.getRoleWithReadiness);
+router.delete('/roles/:id', [auth, adminMiddleware], adminController.deleteRole);
 router.delete('/students/:id', [auth, adminMiddleware], adminController.deleteStudent);
 router.delete('/hrs/:id', [auth, adminMiddleware], adminController.deleteHR);
 

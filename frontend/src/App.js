@@ -112,6 +112,14 @@ const App = () => {
 
             {/* Admin Private Routes */}
             <Route
+              path="/admin/roles/:roleId"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <RoleDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/students/:studentId"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>

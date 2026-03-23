@@ -2,6 +2,7 @@ const Student = require('../models/Student');
 const HR = require('../models/HR');
 const Role = require('../models/Role');
 const Repository = require('../models/Repository');
+const { calculateRoleReadiness } = require('../services/roleReadinessService');
 
 /**
  * @desc    Get all students
@@ -91,6 +92,62 @@ exports.deleteHR = async (req, res) => {
         res.json({ message: 'HR user removed' });
     } catch (err) {
         console.error('Error deleting HR:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+// ==================== ROLE MANAGEMENT ENDPOINTS ====================
+
+/**
+ * @desc    Get role details with ranked students
+ * @route   GET /api/admin/roles/:id
+ * @access  Private (Admin)
+ */
+exports.getRoleWithReadiness = async (req, res) => {
+    try {
+        const role = await Role.findById(req.params.id);
+        if (!role) {
+            return res.status(404).json({ message: 'Role not found' });
+        }
+
+        const rankedStudents = await calculateRoleReadiness(role._id);
+
+        res.json({
+            role: {
+                id: role._id,
+                title: role.title,
+                description: role.description,
+                requiredSkills: role.requiredSkills,
+                optionalSkills: role.optionalSkills,
+                createdAt: role.createdAt
+            },
+            rankedStudents
+        });
+    } catch (err) {
+        console.error('Error fetching role readiness:', err.message);
+        res.status(500).json({ message: 'Server error', reason: err.message });
+    }
+};
+
+/**
+ * @desc    Delete a role
+ * @route   DELETE /api/admin/roles/:id
+ * @access  Private (Admin)
+ */
+exports.deleteRole = async (req, res) => {
+    try {
+        const role = await Role.findById(req.params.id);
+        if (!role) {
+            return res.status(404).json({ message: 'Role not found' });
+        }
+
+        await role.deleteOne();
+        res.json({ message: 'Role removed' });
+    } catch (err) {
+        console.error('Error deleting role:', err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ message: 'Role not found' });
+        }
         res.status(500).json({ message: 'Server error', reason: err.message });
     }
 };
