@@ -11,7 +11,7 @@ const studentMiddleware = require('../middleware/studentMiddleware');
  */
 router.post('/', [auth, studentMiddleware], repositoryController.createRepository);
 
-router.get('/my', auth, repositoryController.getMyRepositories);
+router.get('/my', [auth, studentMiddleware], repositoryController.getMyRepositories);
 
 
 module.exports = router;

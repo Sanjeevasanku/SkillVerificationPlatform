@@ -15,10 +15,10 @@ const Register = () => {
         fullName: '',
         email: '',
         password: '',
+        password2: '',
         college: '',
         branch: '',
         graduationYear: new Date().getFullYear(),
-        role: 'student',
         githubId: '',
         githubUsername: '',
         githubEmail: '',
@@ -34,8 +34,7 @@ const Register = () => {
         password,
         college,
         branch,
-        graduationYear,
-        role
+        graduationYear
     } = formData;
 
     useEffect(() => {
@@ -73,39 +72,30 @@ const Register = () => {
     };
 
     const handleGithubLogin = () => {
-        window.location.href = 'http://localhost:5000/api/auth/github';
+        window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/github`;
     };
 
     return (
         <AuthLayout title="Create Account">
             {!isGithubSync ? (
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div className="mb-lg">
                     <Button
                         type="button"
                         variant="secondary"
                         onClick={handleGithubLogin}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                        className="w-full flex items-center justify-center gap-10px"
                     >
                         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style={{ width: '20px' }} />
                         Verify with GitHub
                     </Button>
-                    <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                    <div className="text-center my-md text-secondary text-xs">
                         GitHub verification is required for students
                     </div>
                 </div>
             ) : (
-                <div style={{
-                    background: 'rgba(40, 167, 69, 0.1)',
-                    padding: '1rem',
-                    borderRadius: 'var(--radius-sm)',
-                    marginBottom: '1.5rem',
-                    border: '1px solid rgba(40, 167, 69, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px'
-                }}>
-                    <span style={{ color: '#28a745' }}>✓</span>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                <div className="github-verified-box">
+                    <span className="github-verified-check">✓</span>
+                    <span className="github-verified-text">
                         GitHub Verified: <strong>{formData.githubUsername}</strong>
                     </span>
                 </div>
@@ -142,7 +132,7 @@ const Register = () => {
                     minLength="6"
                 />
 
-                {(isGithubSync || role === 'student') && (
+                {/* Student-specific fields (always shown since registration is student-only) */}
                     <>
                         <Input
                             label="College / University"
@@ -153,7 +143,7 @@ const Register = () => {
                             required
                             placeholder="Enter your college name"
                         />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="grid-2-cols">
                             <Input
                                 label="Branch"
                                 type="text"
@@ -174,18 +164,11 @@ const Register = () => {
                             />
                         </div>
                     </>
-                )}
+
 
 
                 {error && (
-                    <div style={{
-                        color: 'var(--error-color)',
-                        fontSize: '0.9rem',
-                        marginBottom: '1rem',
-                        background: 'rgba(204, 16, 22, 0.1)',
-                        padding: '0.5rem',
-                        borderRadius: '4px'
-                    }}>
+                    <div className="error-message">
                         {error}
                     </div>
                 )}
@@ -193,15 +176,15 @@ const Register = () => {
                 <Button
                     type="submit"
                     variant="primary"
-                    style={{ width: '100%' }}
-                    disabled={!isGithubSync && role === 'student'}
+                    className="w-full"
+                    disabled={!isGithubSync}
                 >
                     {isGithubSync ? 'Complete Registration' : 'Register'}
                 </Button>
             </form>
 
-            <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
-                Already on SkillVerify? <Link to="/login" style={{ fontWeight: '600' }}>Sign in</Link>
+            <p className="mt-lg text-center text-sm">
+                Already on SkillVerify? <Link to="/login" className="font-semibold">Sign in</Link>
             </p>
         </AuthLayout>
     );

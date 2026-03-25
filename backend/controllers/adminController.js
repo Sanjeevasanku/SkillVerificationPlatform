@@ -46,7 +46,6 @@ exports.getAllHRs = async (req, res) => {
 exports.getAllRoles = async (req, res) => {
     try {
         const roles = await Role.find()
-            .populate('createdBy', 'fullName email')
             .sort({ createdAt: -1 });
 
         res.json(roles);
@@ -68,8 +67,13 @@ exports.deleteStudent = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
+        // Cascade delete related data
+        const Skill = require('../models/Skill');
+        await Repository.deleteMany({ student: req.params.id });
+        await Skill.deleteMany({ student: req.params.id });
+
         await student.deleteOne();
-        res.json({ message: 'Student removed' });
+        res.json({ message: 'Student and related data removed' });
     } catch (err) {
         console.error('Error deleting student:', err.message);
         res.status(500).json({ message: 'Server error', reason: err.message });

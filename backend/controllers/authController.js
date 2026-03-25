@@ -9,6 +9,7 @@ const { encrypt } = require('../utils/encryptToken');
 // @desc    Redirect to GitHub OAuth
 // @route   GET /api/auth/github
 // @access  Public
+// TODO: Store `state` in a session/cookie and validate it in the callback to prevent CSRF attacks.
 exports.githubAuth = (req, res) => {
     const state = crypto.randomBytes(16).toString('hex');
     const clientId = process.env.GITHUB_CLIENT_ID;
@@ -26,7 +27,7 @@ exports.githubCallback = async (req, res) => {
     const { code, state } = req.query;
 
     if (!code) {
-        return res.status(400).json({ msg: 'No code provided from GitHub' });
+        return res.status(400).json({ message: 'No code provided from GitHub' });
     }
 
     try {
@@ -83,13 +84,13 @@ exports.login = async (req, res) => {
         let student = await Student.findOne({ email }).select('+password');
 
         if (!student) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         const isMatch = await student.matchPassword(password);
 
         if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         // Update last login
@@ -122,7 +123,7 @@ exports.login = async (req, res) => {
         );
     } catch (err) {
         console.error('Error in login:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -147,14 +148,14 @@ exports.registerStudent = async (req, res) => {
         // Check if student already exists by email
         let student = await Student.findOne({ email });
         if (student) {
-            return res.status(400).json({ msg: 'Student with this email already exists' });
+            return res.status(400).json({ message: 'Student with this email already exists' });
         }
 
         // If githubId is provided, check if it already exists
         if (githubId) {
             student = await Student.findOne({ githubId });
             if (student) {
-                return res.status(400).json({ msg: 'Student with this GitHub ID already exists' });
+                return res.status(400).json({ message: 'Student with this GitHub ID already exists' });
             }
         }
 
@@ -209,7 +210,7 @@ exports.registerStudent = async (req, res) => {
         );
     } catch (err) {
         console.error('Error registering student:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -228,12 +229,12 @@ exports.getMe = async (req, res) => {
         }
 
         if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
         res.json(user);
     } catch (err) {
         console.error('Error in getMe:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -247,13 +248,13 @@ exports.hrLogin = async (req, res) => {
         let hrUser = await HR.findOne({ email }).select('+password');
 
         if (!hrUser) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         const isMatch = await hrUser.matchPassword(password);
 
         if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         const payload = {
@@ -282,7 +283,7 @@ exports.hrLogin = async (req, res) => {
         );
     } catch (err) {
         console.error('Error in HR login:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -296,13 +297,13 @@ exports.adminLogin = async (req, res) => {
         let adminUser = await Admin.findOne({ email }).select('+password');
 
         if (!adminUser) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         const isMatch = await adminUser.matchPassword(password);
 
         if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
+            return res.status(400).json({ message: 'Invalid Credentials' });
         }
 
         const payload = {
@@ -331,7 +332,7 @@ exports.adminLogin = async (req, res) => {
         );
     } catch (err) {
         console.error('Error in Admin login:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -344,7 +345,7 @@ exports.adminRegister = async (req, res) => {
     try {
         let existing = await Admin.findOne({ email });
         if (existing) {
-            return res.status(400).json({ msg: 'Admin with this email already exists' });
+            return res.status(400).json({ message: 'Admin with this email already exists' });
         }
 
         const adminUser = new Admin({ fullName, email, password });
@@ -376,6 +377,6 @@ exports.adminRegister = async (req, res) => {
         );
     } catch (err) {
         console.error('Error registering admin:', err.message);
-        res.status(500).send('Server error');
+        res.status(500).json({ message: 'Server error' });
     }
 };

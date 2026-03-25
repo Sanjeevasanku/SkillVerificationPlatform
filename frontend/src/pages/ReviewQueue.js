@@ -3,7 +3,6 @@ import api from '../lib/api';
 import Layout from '../components/layout/Layout';
 import Button from '../components/common/Button';
 import { ConfirmDialog } from '../components/common/Dialog';
-import Input from '../components/common/Input';
 
 const BAND_FILTERS = ['all', 'amber', 'red'];
 
@@ -90,87 +89,39 @@ const ReviewQueue = () => {
         setExpandedId(prev => prev === id ? null : id);
     };
 
-    // ─── Filter tab pill styles ───
-    const filterPillStyle = (band) => ({
-        padding: '0.45rem 1.1rem',
-        border: 'none',
-        cursor: 'pointer',
-        fontWeight: activeBand === band ? '700' : '500',
-        fontSize: '0.88rem',
-        background: activeBand === band ? 'var(--brand-color)' : 'transparent',
-        color: activeBand === band ? '#fff' : 'var(--text-secondary)',
-        borderRadius: '50px',
-        textTransform: 'capitalize',
-        transition: 'all 0.2s ease',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.4rem'
-    });
-
-    const dotStyle = (color) => ({
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        background: color,
-        display: 'inline-block'
-    });
-
-    // ─── Score box in expanded area ───
-    const scoreBoxStyle = {
-        background: 'var(--bg-primary)',
-        borderRadius: '10px',
-        padding: '0.9rem 1rem',
-        textAlign: 'center',
-        minWidth: '120px',
-        flex: '1'
-    };
-
-    const scoreValueStyle = {
-        fontSize: '1.35rem',
-        fontWeight: '700',
-        color: 'var(--text-primary)',
-        marginBottom: '0.25rem'
-    };
-
-    const scoreLabelStyle = {
-        fontSize: '0.72rem',
-        color: 'var(--text-secondary)',
-        fontWeight: '500'
-    };
-
     return (
         <Layout>
-            <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
+            <div className="p-xl max-w-1100 mx-auto">
                 {/* Header */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '0.4rem', fontWeight: '800' }}>Review Queue</h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                <div className="mb-lg">
+                    <h1 className="text-3xl font-bold mb-xs">Review Queue</h1>
+                    <p className="text-secondary text-md">
                         Review repositories flagged for manual verification. {repos.length} pending.
                     </p>
                 </div>
 
                 {/* Band filter pills */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                    <button style={filterPillStyle('all')} onClick={() => setActiveBand('all')}>
+                <div className="flex gap-sm mb-lg">
+                    <button className={`filter-pill ${activeBand === 'all' ? 'active' : ''}`} onClick={() => setActiveBand('all')}>
                         All Pending
                     </button>
-                    <button style={filterPillStyle('red')} onClick={() => setActiveBand('red')}>
-                        <span style={dotStyle('#cc1016')} /> High 
+                    <button className={`filter-pill ${activeBand === 'red' ? 'active' : ''}`} onClick={() => setActiveBand('red')}>
+                        <span className="filter-pill-dot" style={{ background: '#cc1016' }} /> High 
                     </button>
-                    <button style={filterPillStyle('amber')} onClick={() => setActiveBand('amber')}>
-                        <span style={dotStyle('#d97706')} /> Medium 
+                    <button className={`filter-pill ${activeBand === 'amber' ? 'active' : ''}`} onClick={() => setActiveBand('amber')}>
+                        <span className="filter-pill-dot" style={{ background: '#d97706' }} /> Medium 
                     </button>
                 </div>
 
                 {/* Cards */}
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '3rem' }}><div className="loader"></div></div>
+                    <div className="text-center p-xl"><div className="loader"></div></div>
                 ) : repos.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-                        <p style={{ color: 'var(--text-secondary)' }}> No repositories pending review!</p>
+                    <div className="text-center p-xl bg-secondary rounded-md">
+                        <p className="text-secondary"> No repositories pending review!</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="flex flex-col gap-md">
                         {repos.map(repo => {
                             const isExpanded = expandedId === repo._id;
                             const bc = bandColors[repo.riskBand] || bandColors.amber;
@@ -186,37 +137,22 @@ const ReviewQueue = () => {
                             const maturityScore = Math.min(Math.round(((repo.activeWeeks || 0) / 8) * 100), 100);
 
                             return (
-                                <div key={repo._id} style={{
-                                    background: 'var(--bg-secondary)',
-                                    borderRadius: '12px',
-                                    borderLeft: `4px solid ${bc.border}`,
-                                    border: `1px solid var(--border-color)`,
+                                <div key={repo._id} className="bg-secondary rounded-lg border-color overflow-hidden" style={{
+                                    borderStyle: 'solid',
+                                    borderWidth: '1px',
                                     borderLeftWidth: '4px',
                                     borderLeftColor: bc.border,
-                                    overflow: 'hidden',
                                     transition: 'box-shadow 0.2s ease'
                                 }}>
                                     {/* ─── Collapsed header ─── */}
-                                    <div style={{
-                                        padding: '1.1rem 1.25rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: '1rem',
-                                        flexWrap: 'wrap'
-                                    }}>
+                                    <div className="flex items-center justify-between gap-md flex-wrap py-md px-lg">
                                         {/* Left: title + badge + student info */}
                                         <div style={{ flex: '1', minWidth: '200px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>
+                                            <div className="flex items-center gap-sm mb-xs flex-wrap">
+                                                <span className="text-lg font-bold">
                                                     {repo.title}
                                                 </span>
-                                                <span style={{
-                                                    display: 'inline-block',
-                                                    padding: '2px 10px',
-                                                    borderRadius: '50px',
-                                                    fontSize: '0.72rem',
-                                                    fontWeight: '700',
+                                                <span className="project-card-badge" style={{
                                                     backgroundColor: bc.bg,
                                                     color: bc.color,
                                                     textTransform: 'capitalize'
@@ -224,29 +160,20 @@ const ReviewQueue = () => {
                                                     {repo.riskBand} — {scorePercent}%
                                                 </span>
                                             </div>
-                                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                            <div className="text-sm text-secondary">
                                                 {repo.student?.fullName || 'Unknown'} • {repo.student?.college || ''} • Batch {repo.student?.graduationYear || ''}
                                             </div>
-                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', fontStyle: 'italic' }}>
+                                            <div className="text-xs text-secondary mt-xs italic">
                                                 {repo.verificationReason || 'Queued for manual review'}
                                             </div>
                                         </div>
 
                                         {/* Right: actions */}
-                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                                        <div className="flex gap-sm items-center flex-shrink-0">
                                             <button
                                                 onClick={() => toggleExpand(repo._id)}
-                                                style={{
-                                                    background: 'transparent',
-                                                    border: '1px solid var(--border-color)',
-                                                    borderRadius: '6px',
-                                                    padding: '0.35rem 0.85rem',
-                                                    fontSize: '0.82rem',
-                                                    cursor: 'pointer',
-                                                    color: 'var(--text-primary)',
-                                                    fontWeight: '500',
-                                                    transition: 'background 0.15s'
-                                                }}
+                                                className="btn-ghost text-sm font-semibold rounded-md border-solid border-color transition-colors"
+                                                style={{ padding: '0.35rem 0.85rem' }}
                                             >
                                                 {isExpanded ? 'Hide Details' : 'Details'}
                                             </button>
@@ -256,9 +183,10 @@ const ReviewQueue = () => {
                                                 ✓ Approve
                                             </Button>
                                             <Button variant="ghost"
+                                                className="text-error border-solid"
                                                 style={{
                                                     padding: '0.35rem 0.9rem', fontSize: '0.82rem',
-                                                    color: 'var(--error-color)', border: '1px solid var(--error-color)',
+                                                    borderColor: 'var(--error-color)',
                                                     borderRadius: '6px'
                                                 }}
                                                 onClick={() => openRejectModal(repo._id)}>
@@ -269,58 +197,40 @@ const ReviewQueue = () => {
 
                                     {/* ─── Expanded details ─── */}
                                     {isExpanded && (
-                                        <div style={{
-                                            borderTop: '1px solid var(--border-color)',
-                                            padding: '1.25rem',
-                                            animation: 'fadeIn 0.2s ease'
+                                        <div className="p-xl border-t border-color" style={{
+                                            animation: 'fadeIn 0.2s ease',
+                                            borderTopStyle: 'solid',
+                                            borderTopWidth: '1px'
                                         }}>
                                             {/* Score Breakdown */}
-                                            <h4 style={{
-                                                fontSize: '0.78rem',
-                                                fontWeight: '700',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.06em',
-                                                color: 'var(--text-secondary)',
-                                                marginBottom: '0.75rem'
-                                            }}>
+                                            <h4 className="text-xs uppercase font-bold text-secondary tracking-wider mb-sm">
                                                 Score Breakdown
                                             </h4>
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '0.75rem',
-                                                flexWrap: 'wrap',
-                                                marginBottom: '1.25rem'
-                                            }}>
-                                                <div style={scoreBoxStyle}>
-                                                    <div style={scoreValueStyle}>{contributionScore}%</div>
-                                                    <div style={scoreLabelStyle}>Contribution Score</div>
+                                            <div className="flex gap-md flex-wrap mb-xl">
+                                                <div className="review-score-box">
+                                                    <div className="review-score-value">{contributionScore}%</div>
+                                                    <div className="review-score-label">Contribution Score</div>
                                                 </div>
-                                                <div style={scoreBoxStyle}>
-                                                    <div style={scoreValueStyle}>{commitVolumeScore}%</div>
-                                                    <div style={scoreLabelStyle}>Commit Volume Score</div>
+                                                <div className="review-score-box">
+                                                    <div className="review-score-value">{commitVolumeScore}%</div>
+                                                    <div className="review-score-label">Commit Volume Score</div>
                                                 </div>
-                                                <div style={scoreBoxStyle}>
-                                                    <div style={scoreValueStyle}>{consistencyScore}%</div>
-                                                    <div style={scoreLabelStyle}>Consistency Score</div>
+                                                <div className="review-score-box">
+                                                    <div className="review-score-value">{consistencyScore}%</div>
+                                                    <div className="review-score-label">Consistency Score</div>
                                                 </div>
-                                                <div style={scoreBoxStyle}>
-                                                    <div style={scoreValueStyle}>{ownershipScore}%</div>
-                                                    <div style={scoreLabelStyle}>Ownership Score</div>
+                                                <div className="review-score-box">
+                                                    <div className="review-score-value">{ownershipScore}%</div>
+                                                    <div className="review-score-label">Ownership Score</div>
                                                 </div>
-                                                <div style={scoreBoxStyle}>
-                                                    <div style={scoreValueStyle}>{maturityScore}%</div>
-                                                    <div style={scoreLabelStyle}>Maturity Score</div>
+                                                <div className="review-score-box">
+                                                    <div className="review-score-value">{maturityScore}%</div>
+                                                    <div className="review-score-label">Maturity Score</div>
                                                 </div>
                                             </div>
 
                                             {/* Stats row */}
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '2rem',
-                                                flexWrap: 'wrap',
-                                                fontSize: '0.88rem',
-                                                marginBottom: '1rem'
-                                            }}>
+                                            <div className="flex gap-xl flex-wrap text-sm mb-lg">
                                                 <div>
                                                     <strong>Contribution:</strong> {contributionScore}%
                                                 </div>
@@ -334,13 +244,7 @@ const ReviewQueue = () => {
                                                     <strong>Language:</strong> {repo.primaryLanguage || '—'}
                                                 </div>
                                             </div>
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '2rem',
-                                                flexWrap: 'wrap',
-                                                fontSize: '0.88rem',
-                                                marginBottom: '1rem'
-                                            }}>
+                                            <div className="flex gap-xl flex-wrap text-sm mb-lg">
                                                 <div>
                                                     <strong>Stars:</strong> {repo.stars ?? 0} &nbsp; <strong>Forks:</strong> {repo.forks ?? 0}
                                                 </div>
@@ -352,12 +256,7 @@ const ReviewQueue = () => {
                                             {/* GitHub link */}
                                             {repo.githubLink && (
                                                 <a href={repo.githubLink} target="_blank" rel="noreferrer"
-                                                    style={{
-                                                        color: 'var(--brand-color)',
-                                                        fontSize: '0.88rem',
-                                                        fontWeight: '600',
-                                                        textDecoration: 'none'
-                                                    }}>
+                                                    className="text-brand text-sm font-semibold no-underline">
                                                     View on GitHub ↗
                                                 </a>
                                             )}
@@ -384,17 +283,13 @@ const ReviewQueue = () => {
 
                 {/* Reject modal with notes */}
                 {showRejectModal && (
-                    <div style={{
+                    <div className="flex-center" style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.5)', display: 'flex',
-                        justifyContent: 'center', alignItems: 'center', zIndex: 1000
+                        background: 'rgba(0,0,0,0.5)', zIndex: 1000
                     }}>
-                        <div style={{
-                            background: 'var(--bg-secondary)', borderRadius: '12px',
-                            padding: '2rem', maxWidth: '480px', width: '90%'
-                        }}>
-                            <h3 style={{ marginBottom: '1rem' }}>Reject Repository</h3>
-                            <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <div className="bg-secondary rounded-lg p-xl w-full" style={{ maxWidth: '480px' }}>
+                            <h3 className="mb-lg">Reject Repository</h3>
+                            <p className="text-secondary text-sm mb-lg">
                                 Please provide a reason for rejection. This will be visible to the student.
                             </p>
                             <textarea
@@ -402,14 +297,10 @@ const ReviewQueue = () => {
                                 onChange={(e) => setRejectNotes(e.target.value)}
                                 placeholder="Reason for rejection (required)..."
                                 rows={4}
-                                style={{
-                                    width: '100%', padding: '0.75rem', borderRadius: '8px',
-                                    border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)', fontSize: '0.9rem',
-                                    marginBottom: '1rem', resize: 'vertical'
-                                }}
+                                className="w-full p-md rounded-md border-solid border-color bg-primary text-primary text-sm mb-lg"
+                                style={{ resize: 'vertical' }}
                             />
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <div className="flex gap-sm justify-end">
                                 <Button variant="secondary" onClick={() => setShowRejectModal(false)}>Cancel</Button>
                                 <Button variant="primary"
                                     style={{ backgroundColor: 'var(--error-color)' }}

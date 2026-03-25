@@ -34,7 +34,7 @@ const StudentProfileView = () => {
     if (loading) {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '50vh' }}>
+                <div className="flex-center min-h-50vh">
                     <div className="loader"></div>
                 </div>
             </Layout>
@@ -44,8 +44,8 @@ const StudentProfileView = () => {
     if (error || !profileData) {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '50vh', flexDirection: 'column', gap: '1rem' }}>
-                    <h2 style={{ color: 'var(--error-color)' }}>Error</h2>
+                <div className="flex-center flex-col gap-md min-h-50vh">
+                    <h2 className="text-error">Error</h2>
                     <p>{error || 'Profile not found'}</p>
                     <Link to={backLink}>
                         <button className="btn btn-secondary">Back to Dashboard</button>
@@ -59,48 +59,52 @@ const StudentProfileView = () => {
 
     return (
         <Layout>
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '1rem' }}>
-                <Link to={backLink} style={{ color: 'var(--brand-color)', textDecoration: 'none', display: 'inline-block', marginBottom: '1.5rem' }}>
+            <div className="max-w-1000 mx-auto p-md">
+                <Link to={backLink} className="text-brand no-underline inline-block mb-lg">
                     ← Back to Dashboard
                 </Link>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1.5rem' }}>
+                <div className="flex justify-between items-start mb-xl flex-wrap gap-lg">
                     <div>
-                        <h1 style={{ marginBottom: '0.5rem' }}>{student.fullName}</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                        <h1 className="mb-sm">{student.fullName}</h1>
+                        <p className="text-secondary text-md">
                             {student.college} • {student.branch} • Batch of {student.graduationYear}
                         </p>
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div className="dashboard-grid mb-2xl">
                     <Card title="Quick Stats">
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', textAlign: 'center' }}>
+                        <div className="grid-2-cols text-center">
                             <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>
+                                <h3 className="stat-card-number text-brand">
                                     {overallStats?.projectCount || 0}
                                 </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Projects</p>
+                                <p className="stat-card-label">Projects</p>
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--success-color)', margin: 0 }}>
+                                <h3 className="stat-card-number text-success">
                                     {skills.length}
                                 </h3>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Verified Skills</p>
+                                <p className="stat-card-label">Verified Skills</p>
                             </div>
                         </div>
                     </Card>
 
                     <Card title="Contact Info">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div className="flex flex-col gap-sm">
                             <p><strong>Email:</strong> {student.email}</p>
-                            <p><strong>GitHub:</strong> <a href={`https://github.com/${student.githubUsername}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand-color)' }}>@{student.githubUsername}</a></p>
+                            {student.githubUsername ? (
+                                <p><strong>GitHub:</strong> <a href={`https://github.com/${student.githubUsername}`} target="_blank" rel="noopener noreferrer" className="text-brand">@{student.githubUsername}</a></p>
+                            ) : (
+                                <p><strong>GitHub:</strong> <span className="text-secondary">Not linked</span></p>
+                            )}
                         </div>
                     </Card>
                 </div>
 
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <h2 style={{ marginBottom: '1.5rem' }}>Verified Skill Profile</h2>
+                <div className="mb-2xl">
+                    <h2 className="mb-lg">Verified Skill Profile</h2>
                     <SkillProfile
                         skills={skills}
                         categorySummary={categorySummary}
@@ -109,14 +113,9 @@ const StudentProfileView = () => {
                 </div>
 
                 {projects && projects.length > 0 && (
-                    <div style={{ marginBottom: '2.5rem' }}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>Verified Projects</h2>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                            gap: '1.5rem',
-                            alignItems: 'start'
-                        }}>
+                    <div className="mb-2xl">
+                        <h2 className="mb-lg">Verified Projects</h2>
+                        <div className="projects-grid items-start">
                             {projects.map(project => (
                                 <ProjectCard
                                     key={project._id}

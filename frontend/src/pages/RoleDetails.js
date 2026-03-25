@@ -36,128 +36,102 @@ const RoleDetails = () => {
         };
 
         fetchRoleDetails();
-    }, [roleId]);
+    }, [roleId, apiBase]);
 
-    if (loading) return <Layout><div style={{ padding: '2rem' }}>Loading...</div></Layout>;
-    if (!data) return <Layout><div style={{ padding: '2rem' }}>Role not found.</div></Layout>;
+    if (loading) return <Layout><div className="p-xl">Loading...</div></Layout>;
+    if (!data) return <Layout><div className="p-xl">Role not found.</div></Layout>;
 
     const { role, rankedStudents } = data;
 
     return (
         <Layout>
-            <div style={{ padding: '2rem' }}>
-                <Link to={dashboardPath} style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'inline-block' }}>← Back to Dashboard</Link>
+            <div className="p-xl">
+                <Link to={dashboardPath} className="text-brand mb-md inline-block no-underline">← Back to Dashboard</Link>
 
-                <div style={{ marginBottom: '3rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{role.title}</h1>
-                    <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '800px', lineHeight: '1.6' }}>{role.description}</p>
+                <div className="mb-2xl">
+                    <h1 className="text-3xl mb-md">{role.title}</h1>
+                    <p className="text-md text-secondary max-w-800 leading-relaxed">{role.description}</p>
                 </div>
 
-                <h2 style={{ marginBottom: '1.5rem' }}>Ranked Candidates</h2>
+                <h2 className="mb-lg">Ranked Candidates</h2>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="flex flex-col gap-md">
                     {rankedStudents.length > 0 ? (
                         rankedStudents.map((student, index) => (
-                            <div key={student.studentId} style={{
-                                background: 'var(--bg-secondary)',
-                                padding: '1.5rem',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border-color)',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '0.5rem' }}>
-                                        <span style={{
-                                            background: index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : 'var(--bg-primary)',
-                                            color: index < 3 ? 'black' : 'var(--text-primary)',
-                                            width: '30px',
-                                            height: '30px',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.9rem'
+                            <div key={student.studentId} className="card flex flex-row justify-between items-center w-full">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-md mb-sm">
+                                        <span className="rank-badge" style={{
+                                            background: index === 0 ? 'rgba(245, 158, 11, 0.15)' : /* Gold-ish */
+                                                index === 1 ? 'rgba(156, 163, 175, 0.15)' : /* Silver-ish */
+                                                    index === 2 ? 'rgba(180, 83, 9, 0.1)' : /* Bronze-ish */
+                                                        'var(--bg-primary)',
+                                            color: index === 0 ? '#b45309' :
+                                                index === 1 ? '#4b5563' :
+                                                    index === 2 ? '#78350f' :
+                                                        'var(--text-secondary)'
                                         }}>
                                             {index + 1}
                                         </span>
-                                        <h3 style={{ margin: 0 }}>{student.name}</h3>
-                                        <span style={{
-                                            padding: '4px 12px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
+                                        <h3 className="m-0">{student.name}</h3>
+                                        <span className="status-badge" style={{
                                             backgroundColor:
-                                                student.label === 'Highly Ready' ? 'rgba(0, 255, 0, 0.1)' :
-                                                    student.label === 'Moderately Ready' ? 'rgba(255, 165, 0, 0.1)' :
-                                                        'rgba(255, 0, 0, 0.1)',
+                                                student.label === 'Highly Ready' ? 'rgba(5, 118, 66, 0.08)' :
+                                                    student.label === 'Moderately Ready' ? 'rgba(245, 158, 11, 0.08)' :
+                                                        'rgba(204, 16, 22, 0.08)',
                                             color:
-                                                student.label === 'Highly Ready' ? '#00ff00' :
-                                                    student.label === 'Moderately Ready' ? '#ffa500' :
-                                                        '#ff0000',
-                                            border: `1px solid ${student.label === 'Highly Ready' ? '#00ff0033' :
-                                                student.label === 'Moderately Ready' ? '#ffa50033' :
-                                                    '#ff000033'
+                                                student.label === 'Highly Ready' ? 'var(--success-color)' :
+                                                    student.label === 'Moderately Ready' ? '#b45309' /* Darker warning for text */ :
+                                                        'var(--error-color)',
+                                            border: `1px solid ${student.label === 'Highly Ready' ? 'rgba(5, 118, 66, 0.2)' :
+                                                student.label === 'Moderately Ready' ? 'rgba(245, 158, 11, 0.2)' :
+                                                    'rgba(204, 16, 22, 0.2)'
                                                 }`
                                         }}>
                                             {student.label}
                                         </span>
                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                        <div style={{ display: 'flex', gap: '20px' }}>
+                                    <div className="flex flex-col gap-sm text-sm text-secondary">
+                                        <div className="flex gap-lg">
                                             <div>
-                                                <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{(student.readinessScore * 100).toFixed(0)}%</span> Match
+                                                <span className="font-bold text-primary">{(student.readinessScore * 100).toFixed(0)}%</span> Match
                                             </div>
                                         </div>
 
                                         {(() => {
                                             const matched = student.skillBreakdown?.filter(s => s.score >= 0.6).map(s => s.skill) || [];
                                             return matched.length > 0 && (
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                                                    <span style={{ color: 'var(--success-color)', fontWeight: '600', minWidth: '100px' }}>✓ Existing:</span>
+                                                <div className="flex flex-wrap gap-sm items-center">
+                                                    <span className="text-success font-semibold min-w-100">✓ Existing:</span>
                                                     {matched.map(s => (
-                                                        <span key={s} style={{
-                                                            padding: '2px 8px', border: '1px solid var(--success-color)',
-                                                            borderRadius: '4px', fontSize: '0.75rem', color: 'var(--success-color)',
-                                                            backgroundColor: 'rgba(5, 118, 66, 0.05)'
-                                                        }}>{s}</span>
+                                                        <span key={s} className="skill-match-tag">{s}</span>
                                                     ))}
                                                 </div>
                                             );
                                         })()}
 
                                         {student.weakSkills.length > 0 && (
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                                                <span style={{ color: 'var(--warning-color)', fontWeight: '600', minWidth: '100px' }}>⚠ Weak in:</span>
+                                            <div className="flex flex-wrap gap-sm items-center">
+                                                <span className="text-warning font-semibold min-w-100">⚠ Weak in:</span>
                                                 {student.weakSkills.map(s => (
-                                                    <span key={s} style={{
-                                                        padding: '2px 8px', border: '1px solid var(--warning-color)',
-                                                        borderRadius: '4px', fontSize: '0.75rem', color: 'var(--warning-color)',
-                                                        backgroundColor: 'rgba(245, 158, 11, 0.05)'
-                                                    }}>{s}</span>
+                                                    <span key={s} className="skill-weak-tag">{s}</span>
                                                 ))}
                                             </div>
                                         )}
 
                                         {student.missingSkills.length > 0 && (
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                                                <span style={{ color: 'var(--error-color)', fontWeight: '600', minWidth: '100px' }}>✕ Missing:</span>
+                                            <div className="flex flex-wrap gap-sm items-center">
+                                                <span className="text-error font-semibold min-w-100">✕ Missing:</span>
                                                 {student.missingSkills.map(s => (
-                                                    <span key={s} style={{
-                                                        padding: '2px 8px', border: '1px solid var(--error-color)',
-                                                        borderRadius: '4px', fontSize: '0.75rem', color: 'var(--error-color)',
-                                                        backgroundColor: 'rgba(239, 68, 68, 0.05)'
-                                                    }}>{s}</span>
+                                                    <span key={s} className="skill-missing-tag">{s}</span>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="flex gap-10px pr-md">
                                     <Link to={`${studentBasePath}/${student.studentId}`}>
                                         <Button variant="secondary">Profile</Button>
                                     </Link>

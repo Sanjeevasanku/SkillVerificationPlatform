@@ -45,19 +45,24 @@ const CreateRole = () => {
     const onSubmit = async e => {
         e.preventDefault();
         try {
-            await api.post('/hr/roles', formData);
+            // Filter out optional skills with empty names
+            const payload = {
+                ...formData,
+                optionalSkills: formData.optionalSkills.filter(s => s.skillName.trim() !== '')
+            };
+            await api.post('/hr/roles', payload);
             navigate('/hr/dashboard');
         } catch (err) {
             console.error('Error creating role:', err);
-            showAlertDialog('Error', err.response?.data?.reason || 'Failed to create role');
+            showAlertDialog('Error', err.response?.data?.reason || err.response?.data?.message || 'Failed to create role');
         }
     };
 
     return (
         <Layout>
-            <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
-                <h1 style={{ marginBottom: '2rem' }}>Create New Job Role</h1>
-                <form onSubmit={onSubmit} style={{ background: 'var(--bg-secondary)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div className="max-w-800 mx-auto px-md my-xl">
+                <h1 className="mb-xl">Create New Job Role</h1>
+                <form onSubmit={onSubmit} className="bg-secondary p-xl rounded-lg border-solid border-color">
                     <Input
                         label="Job Title"
                         type="text"
@@ -68,33 +73,25 @@ const CreateRole = () => {
                         placeholder="e.g. Senior Backend Engineer"
                     />
 
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Description</label>
+                    <div className="mb-lg">
+                        <label className="block mb-xs font-bold">Description</label>
                         <textarea
                             name="description"
                             value={description}
                             onChange={onChange}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-color)',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                minHeight: '100px'
-                            }}
+                            className="form-textarea bg-primary"
                             placeholder="Describe the role and responsibilities..."
                         />
                     </div>
 
-                    <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h3 style={{ margin: 0 }}>Required Skills</h3>
+                    <div className="mb-xl">
+                        <div className="flex justify-between items-center mb-md">
+                            <h3 className="m-0">Required Skills</h3>
                             <Button type="button" variant="secondary" onClick={() => addSkill('requiredSkills')}>+ Add Skill</Button>
                         </div>
                         {requiredSkills.map((skill, index) => (
-                            <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                <div style={{ flex: 3 }}>
+                            <div key={index} className="flex gap-sm mb-sm">
+                                <div className="flex-3">
                                     <Input
                                         value={skill.skillName}
                                         onChange={(e) => onSkillChange(index, 'skillName', e.target.value, 'requiredSkills')}
@@ -102,7 +99,7 @@ const CreateRole = () => {
                                         required
                                     />
                                 </div>
-                                <div style={{ flex: 1 }}>
+                                <div className="flex-1">
                                     <Input
                                         type="number"
                                         step="0.1"
@@ -113,27 +110,27 @@ const CreateRole = () => {
                                     />
                                 </div>
                                 {requiredSkills.length > 1 && (
-                                    <Button type="button" variant="secondary" onClick={() => removeSkill(index, 'requiredSkills')} style={{ alignSelf: 'center', marginBottom: '1.5rem' }}>✕</Button>
+                                    <Button type="button" variant="secondary" onClick={() => removeSkill(index, 'requiredSkills')} className="self-center mb-lg">✕</Button>
                                 )}
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h3 style={{ margin: 0 }}>Optional Skills</h3>
+                    <div className="mb-xl">
+                        <div className="flex justify-between items-center mb-md">
+                            <h3 className="m-0">Optional Skills</h3>
                             <Button type="button" variant="secondary" onClick={() => addSkill('optionalSkills')}>+ Add Skill</Button>
                         </div>
                         {optionalSkills.map((skill, index) => (
-                            <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                <div style={{ flex: 3 }}>
+                            <div key={index} className="flex gap-sm mb-sm">
+                                <div className="flex-3">
                                     <Input
                                         value={skill.skillName}
                                         onChange={(e) => onSkillChange(index, 'skillName', e.target.value, 'optionalSkills')}
                                         placeholder="Skill Name (e.g. Docker)"
                                     />
                                 </div>
-                                <div style={{ flex: 1 }}>
+                                <div className="flex-1">
                                     <Input
                                         type="number"
                                         step="0.1"
@@ -143,15 +140,15 @@ const CreateRole = () => {
                                     />
                                 </div>
                                 {optionalSkills.length > 0 && (
-                                    <Button type="button" variant="secondary" onClick={() => removeSkill(index, 'optionalSkills')} style={{ alignSelf: 'center', marginBottom: '1.5rem' }}>✕</Button>
+                                    <Button type="button" variant="secondary" onClick={() => removeSkill(index, 'optionalSkills')} className="self-center mb-lg">✕</Button>
                                 )}
                             </div>
                         ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <Button type="submit" variant="primary" style={{ flex: 1 }}>Create Role</Button>
-                        <Button type="button" variant="secondary" onClick={() => navigate('/hr/dashboard')} style={{ flex: 1 }}>Cancel</Button>
+                    <div className="flex gap-sm">
+                        <Button type="submit" variant="primary" className="flex-1">Create Role</Button>
+                        <Button type="button" variant="secondary" onClick={() => navigate('/hr/dashboard')} className="flex-1">Cancel</Button>
                     </div>
                 </form>
                 <AlertDialog

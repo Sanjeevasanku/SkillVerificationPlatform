@@ -94,7 +94,8 @@ exports.evaluateRound1 = async (req, res) => {
                         testTimeTaken: timeTaken,
                         testAttempt: attempt,
                         testTakenAt: new Date(),
-                        testNextEligibleDate: nextEligibleDate
+                        testNextEligibleDate: nextEligibleDate,
+                        pendingRound1Score: null
                     }
                 }
             );
@@ -110,7 +111,12 @@ exports.evaluateRound1 = async (req, res) => {
             });
         }
 
-        // Score >= 2 — generate round 2 questions
+        // Score >= 2 — store round1Score server-side and generate round 2 questions
+        await Skill.findOneAndUpdate(
+            { student: req.user.id, name: skillName },
+            { $set: { pendingRound1Score: round1Score } }
+        );
+
         const skills = await Skill.find({ student: req.user.id, name: skillName });
         const round2Questions = await groqService.generateQuestions(skills, 2);
 
@@ -139,7 +145,7 @@ exports.evaluateRound1 = async (req, res) => {
  */
 exports.evaluateFinal = async (req, res) => {
     try {
-        const { skillName, answers, timeTaken, round1Score } = req.body;
+        const { skillName, answers, timeTaken } = req.body;
 
         if (!skillName) {
             return res.status(400).json({ message: 'Skill name is required' });
@@ -152,15 +158,17 @@ exports.evaluateFinal = async (req, res) => {
             });
         }
 
-        if (round1Score === undefined || round1Score === null) {
+        // Read round1Score from server-side storage (not from client)
+        const skillDoc = await Skill.findOne({ student: req.user.id, name: skillName });
+
+        if (!skillDoc || skillDoc.pendingRound1Score === null || skillDoc.pendingRound1Score === undefined) {
             return res.status(400).json({
-                message: 'Missing round 1 score',
-                reason: 'Round 1 score is required for final evaluation'
+                message: 'Invalid test state',
+                reason: 'No pending round 1 score found. Please start a new test.'
             });
         }
 
-        // Check eligibility via Skill doc
-        const skillDoc = await Skill.findOne({ student: req.user.id, name: skillName });
+        const round1Score = skillDoc.pendingRound1Score;
 
         if (skillDoc && skillDoc.testTakenAt) {
             if (Date.now() < new Date(skillDoc.testNextEligibleDate)) {
@@ -193,7 +201,8 @@ exports.evaluateFinal = async (req, res) => {
                     testTimeTaken: timeTaken,
                     testAttempt: attempt,
                     testTakenAt: new Date(),
-                    testNextEligibleDate: nextEligibleDate
+                    testNextEligibleDate: nextEligibleDate,
+                    pendingRound1Score: null
                 }
             }
         );

@@ -9,7 +9,7 @@ const getSkillProfile = async (req, res) => {
         const studentId = req.user.id;
 
         if (!studentId) {
-            return res.status(400).json({ msg: 'Student ID not found in token' });
+            return res.status(400).json({ message: 'Student ID not found in token' });
         }
 
         const profile = await generateStudentSkillProfile(studentId);
@@ -17,7 +17,7 @@ const getSkillProfile = async (req, res) => {
         res.json(profile);
     } catch (err) {
         console.error('Error in getSkillProfile:', err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -30,7 +30,7 @@ const getStudentProfileById = async (req, res) => {
     try {
         const student = await Student.findById(req.params.id).select('-githubAccessToken');
         if (!student) {
-            return res.status(404).json({ msg: 'Student not found' });
+            return res.status(404).json({ message: 'Student not found' });
         }
 
         const skillProfile = await generateStudentSkillProfile(student._id);
@@ -49,7 +49,7 @@ const getStudentProfileById = async (req, res) => {
         });
     } catch (err) {
         console.error('Error in getStudentProfileById:', err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

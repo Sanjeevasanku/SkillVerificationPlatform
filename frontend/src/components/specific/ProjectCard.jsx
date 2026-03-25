@@ -20,10 +20,8 @@ const ProjectCard = ({ project }) => {
         const s = styles[status] || styles.verified;
         return (
             <span title={status === 'rejected' ? project.verificationReason : ''}
-                style={{
-                    padding: '3px 10px', borderRadius: '50px', fontSize: '0.72rem',
-                    fontWeight: '700', backgroundColor: s.bg, color: s.color, whiteSpace: 'nowrap'
-                }}>
+                className="project-card-badge"
+                style={{ backgroundColor: s.bg, color: s.color }}>
                 {s.label}
             </span>
         );
@@ -38,73 +36,49 @@ const ProjectCard = ({ project }) => {
         ? Math.round(project.authorshipScore * 100) : null;
 
     const statItem = (label, value) => (
-        <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            padding: '0.35rem 0',
-            fontSize: '0.84rem'
-        }}>
-            <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
-            <span style={{ fontWeight: '600' }}>{value}</span>
+        <div className="project-card-stat-item">
+            <span className="text-secondary">{label}</span>
+            <span className="font-semibold">{value}</span>
         </div>
     );
 
     return (
-        <Card className="project-card" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
-            overflow: 'hidden',
-            height: expanded ? 'auto' : '500px'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--brand-color)' }}>{project.title}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <Card className={`project-card flex flex-col relative overflow-hidden ${expanded ? 'project-card-h-expanded' : 'project-card-h-collapsed'}`}>
+            <div className="project-card-title-section">
+                <h3 className="m-0 text-xl text-brand">{project.title}</h3>
+                <div className="project-card-badges-col">
                     {getVerificationBadge()}
-                    <span style={{
-                        padding: '3px 10px', borderRadius: '50px', fontSize: '0.78rem', fontWeight: '700',
-                        color: '#fff', backgroundColor: getContributionColor(project.contributionPercentage), whiteSpace: 'nowrap'
-                    }}>
+                    <span 
+                        className="project-card-badge text-white" 
+                        style={{ backgroundColor: getContributionColor(project.contributionPercentage) }}
+                    >
                         {project.contributionPercentage}% Contrib
                     </span>
                     {project.isFork && (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>Forked Repo</span>
+                        <span className="text-xs text-tertiary">Forked Repo</span>
                     )}
                     {project.repoOwnerType === 'Organization' && (
-                        <span style={{ fontSize: '0.68rem', color: '#a78bfa' }}>Org Repo</span>
+                        <span className="text-xs" style={{ color: '#a78bfa' }}>Org Repo</span>
                     )}
                 </div>
             </div>
 
-            <p style={{ marginBottom: '1.5rem', minHeight: '3em', color: 'var(--text-secondary)' }}>
+            <p className="project-card-desc">
                 {project.description}
             </p>
 
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="mb-lg">
                 <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
                 {hasSkills ? (
-                    <div style={{
-                        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around',
-                        height: '140px', padding: '8px 0', gap: '8px',
-                        background: 'rgba(0,0,0,0.02)', borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-color)', paddingTop: '28px'
-                    }}>
+                    <div className="project-card-skills-container">
                         {project.skills.map((skill, i) => {
                             const barColor = 'var(--brand-color)';
                             return (
-                                <div key={i} style={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                    flex: 1, height: '100%', justifyContent: 'flex-end', position: 'relative'
-                                }}>
+                                <div key={i} className="project-card-skill-col">
                                     <div
                                         title={`${skill.name}: ${(skill.confidenceScore * 100).toFixed(0)}%`}
-                                        style={{
-                                            width: '100%', maxWidth: '28px',
-                                            height: `${skill.confidenceScore * 100}%`,
-                                            backgroundColor: barColor,
-                                            borderRadius: '4px 4px 0 0',
-                                            transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                                            cursor: 'pointer', position: 'relative'
-                                        }}
+                                        className="project-card-skill-bar"
+                                        style={{ height: `${skill.confidenceScore * 100}%` }}
                                     >
                                         <span style={{
                                             position: 'absolute', top: '-20px', left: '50%',
@@ -114,12 +88,7 @@ const ProjectCard = ({ project }) => {
                                             {(skill.confidenceScore * 100).toFixed(0)}%
                                         </span>
                                     </div>
-                                    <span style={{
-                                        marginTop: '6px', fontSize: '0.62rem', fontWeight: '600',
-                                        color: 'var(--text-secondary)', textAlign: 'center',
-                                        whiteSpace: 'nowrap', overflow: 'hidden',
-                                        textOverflow: 'ellipsis', width: '100%'
-                                    }}>
+                                    <span className="project-card-skill-label">
                                         {skill.name}
                                     </span>
                                 </div>
@@ -127,7 +96,7 @@ const ProjectCard = ({ project }) => {
                         })}
                     </div>
                 ) : (
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                    <p className="text-sm text-tertiary italic">
                         ⏳ Skill analysis running in background…
                     </p>
                 )}
@@ -135,14 +104,7 @@ const ProjectCard = ({ project }) => {
 
             {/* ─── Expandable details section ─── */}
             {expanded && (
-                <div style={{
-                    marginBottom: '1rem',
-                    padding: '0.75rem',
-                    background: 'var(--bg-primary)',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    animation: 'fadeIn 0.2s ease'
-                }}>
+                <div className="project-card-expanded-content">
                     <h4 style={{
                         fontSize: '0.72rem', textTransform: 'uppercase',
                         color: 'var(--text-secondary)', letterSpacing: '0.05em',
@@ -160,9 +122,8 @@ const ProjectCard = ({ project }) => {
                     {statItem('Active Weeks', project.activeWeeks ?? '—')}
                     {statItem('Primary Language', project.primaryLanguage || '—')}
                     {project.riskBand && statItem('Risk Band', (
-                        <span style={{
-                            padding: '1px 8px', borderRadius: '50px', fontSize: '0.72rem',
-                            fontWeight: '700', textTransform: 'capitalize',
+                        <span className="project-card-badge" style={{
+                            textTransform: 'capitalize',
                             backgroundColor: project.riskBand === 'green' ? 'rgba(5,118,66,0.1)' :
                                 project.riskBand === 'amber' ? 'rgba(245,158,11,0.1)' : 'rgba(204,16,22,0.1)',
                             color: project.riskBand === 'green' ? '#05763e' :
@@ -174,23 +135,11 @@ const ProjectCard = ({ project }) => {
                 </div>
             )}
 
-            <div style={{
-                marginTop: 'auto',
-                paddingTop: '1rem', borderTop: '1px solid var(--border-color)',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
+            <div className="project-card-footer">
                 {/* Down arrow toggle */}
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    style={{
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '0.35rem',
-                        color: 'var(--text-secondary)', fontSize: '0.82rem',
-                        fontWeight: '500', padding: '0.2rem 0',
-                        transition: 'color 0.15s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                    className="project-card-toggle-btn"
                 >
                     <span style={{
                         display: 'inline-block',
@@ -207,11 +156,7 @@ const ProjectCard = ({ project }) => {
                     href={project.githubLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                        textDecoration: 'none', color: 'var(--brand-color)',
-                        fontSize: '0.88rem', fontWeight: '600',
-                        display: 'flex', alignItems: 'center', gap: '4px'
-                    }}
+                    className="text-brand no-underline font-semibold flex items-center gap-xs text-sm"
                 >
                     View on GitHub <span>↗</span>
                 </a>

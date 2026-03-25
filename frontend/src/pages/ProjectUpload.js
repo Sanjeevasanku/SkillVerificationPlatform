@@ -1,6 +1,5 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import api from '../lib/api';
-import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Card from '../components/common/Card';
@@ -43,8 +42,8 @@ const ProjectUpload = () => {
 
     return (
         <Layout>
-            <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-                <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <div className="max-w-700 mx-auto">
+                <div className="text-center mb-xl">
                     <h1>Verify Repository</h1>
                     <p>Submit your GitHub repository for verification</p>
                 </div>
@@ -61,8 +60,8 @@ const ProjectUpload = () => {
                             placeholder="e.g., My Portfolio Website"
                         />
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                        <div className="mb-md">
+                            <label className="block mb-xs text-sm font-semibold text-secondary">
                                 Description
                             </label>
                             <textarea
@@ -71,19 +70,7 @@ const ProjectUpload = () => {
                                 onChange={onChange}
                                 required
                                 placeholder="A brief description of the technical work implemented..."
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontSize: '1rem',
-                                    outline: 'none',
-                                    minHeight: '120px',
-                                    fontFamily: 'inherit',
-                                    resize: 'vertical',
-                                    backgroundColor: 'var(--bg-secondary)',
-                                    color: 'var(--text-primary)'
-                                }}
+                                className="form-textarea"
                             ></textarea>
                         </div>
 
@@ -97,19 +84,19 @@ const ProjectUpload = () => {
                             placeholder="https://github.com/yourusername/reponame"
                         />
 
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                        <div className="flex gap-md mt-lg">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 onClick={() => navigate('/dashboard')}
-                                style={{ flex: 1 }}
+                                className="flex-1"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 variant="primary"
-                                style={{ flex: 2 }}
+                                className="flex-2"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? 'Analyzing Repository...' : 'Verify & Submit'}

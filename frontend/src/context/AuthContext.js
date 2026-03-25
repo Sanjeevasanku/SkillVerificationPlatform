@@ -59,9 +59,7 @@ export const AuthProvider = ({ children }) => {
 
     // Load User
     const loadUser = async () => {
-        if (localStorage.token) {
-            setAuthToken(localStorage.token);
-        } else {
+        if (!localStorage.getItem('token')) {
             dispatch({ type: 'AUTH_ERROR' });
             return;
         }
@@ -94,9 +92,9 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             dispatch({
                 type: 'REGISTER_FAIL',
-                payload: err.response?.data?.msg || 'Registration failed',
+                payload: err.response?.data?.message || 'Registration failed',
             });
-            return { success: false, error: err.response?.data?.msg || 'Registration failed' };
+            return { success: false, error: err.response?.data?.message || 'Registration failed' };
         }
     };
 
@@ -119,7 +117,7 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             dispatch({
                 type: 'LOGIN_FAIL',
-                payload: err.response?.data?.msg || 'Invalid Credentials',
+                payload: err.response?.data?.message || 'Invalid Credentials',
             });
         }
     };
@@ -165,13 +163,8 @@ export const AuthProvider = ({ children }) => {
 
 export const setAuthToken = (token) => {
     if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Updated to match backend
         localStorage.setItem('token', token);
-        console.log('--- AUTH TOKEN (Copy this for manual testing) ---');
-        console.log(token);
-        console.log('---------------------------------------------');
     } else {
-        delete api.defaults.headers.common['Authorization'];
         localStorage.removeItem('token');
     }
 }

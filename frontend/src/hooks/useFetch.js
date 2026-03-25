@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../lib/api';
 
-const useFetch = (url, options = {}) => {
+const useFetch = (url) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -9,7 +9,7 @@ const useFetch = (url, options = {}) => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await api.get(url, options);
+            const response = await api.get(url);
             setData(response.data);
             setError(null);
         } catch (err) {

@@ -49,29 +49,29 @@ const Login = () => {
     };
 
     const handleGithubLogin = () => {
-        window.location.href = 'http://localhost:5000/api/auth/github';
+        window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/github`;
     };
 
     return (
         <AuthLayout title="Sign In">
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="mb-lg">
                 <Button
                     type="button"
                     variant="secondary"
                     onClick={handleGithubLogin}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    className="w-full flex items-center justify-center gap-10px"
                 >
                     <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style={{ width: '20px' }} />
                     Continue with GitHub
                 </Button>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem' }}>
+            <div className="flex gap-10px mb-lg">
                 <Button
                     type="button"
                     variant={selectedRole === 'student' ? 'primary' : 'secondary'}
                     onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'student' }))}
-                    style={{ flex: 1 }}
+                    className="flex-1"
                 >
                     Student
                 </Button>
@@ -79,7 +79,7 @@ const Login = () => {
                     type="button"
                     variant={selectedRole === 'hr' ? 'primary' : 'secondary'}
                     onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'hr' }))}
-                    style={{ flex: 1 }}
+                    className="flex-1"
                 >
                     HR
                 </Button>
@@ -87,15 +87,15 @@ const Login = () => {
                     type="button"
                     variant={selectedRole === 'admin' ? 'primary' : 'secondary'}
                     onClick={() => setFormData(prev => ({ ...prev, selectedRole: 'admin' }))}
-                    style={{ flex: 1 }}
+                    className="flex-1"
                 >
                     Admin
                 </Button>
             </div>
 
-            <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)', fontSize: '0.8rem', position: 'relative' }}>
-                <span style={{ background: 'var(--bg-primary)', padding: '0 10px', position: 'relative', zIndex: 1 }}>or sign in with credentials</span>
-                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderBottom: '1px solid var(--border-color)', zIndex: 0 }}></div>
+            <div className="divider-container">
+                <span className="divider-text">or sign in with credentials</span>
+                <div className="divider-line"></div>
             </div>
 
             <form onSubmit={onSubmit}>
@@ -119,25 +119,18 @@ const Login = () => {
                 />
 
                 {error && (
-                    <div style={{
-                        color: 'var(--error-color)',
-                        fontSize: '0.9rem',
-                        marginBottom: '1rem',
-                        background: 'rgba(204, 16, 22, 0.1)',
-                        padding: '0.5rem',
-                        borderRadius: '4px'
-                    }}>
+                    <div className="error-message">
                         {error}
                     </div>
                 )}
 
-                <Button type="submit" variant="primary" style={{ width: '100%' }}>
+                <Button type="submit" variant="primary" className="w-full">
                     Sign In
                 </Button>
             </form>
 
-            <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
-                New to SkillVerify? <Link to="/register" style={{ fontWeight: '600' }}>Join now</Link>
+            <p className="mt-lg text-center text-sm">
+                New to SkillVerify? <Link to="/register" className="font-semibold">Join now</Link>
             </p>
         </AuthLayout>
     );

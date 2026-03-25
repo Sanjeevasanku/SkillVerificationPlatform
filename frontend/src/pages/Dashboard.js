@@ -33,7 +33,7 @@ const Dashboard = () => {
     if (!user) {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '50vh' }}>
+                <div className="flex-center min-h-50vh">
                     <div className="loader"></div>
                 </div>
             </Layout>
@@ -42,18 +42,18 @@ const Dashboard = () => {
 
     return (
         <Layout>
-            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                <h1 style={{ marginBottom: '1.5rem' }}>Dashboard</h1>
+            <div className="max-w-1000 mx-auto">
+                <h1 className="mb-lg">Dashboard</h1>
 
                 <Card
                     title={`Welcome back, ${user.fullName || user.githubUsername || 'Student'}`}
-                    style={{ marginBottom: '2rem' }}
+                    className="mb-xl"
                 >
-                    <p style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                    <p className="mb-lg text-lg">
                         Empowering your career with verified expertise.
                     </p>
 
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div className="flex gap-md flex-wrap">
                         <Button
                             variant="primary"
                             onClick={() => navigate('/upload-project')}
@@ -69,7 +69,7 @@ const Dashboard = () => {
                     </div>
                 </Card>
 
-                <div style={{ marginBottom: '2rem' }}>
+                <div className="mb-xl">
                     <SkillProfile
                         skills={skillData.skills}
                         categorySummary={skillData.categorySummary}
@@ -78,11 +78,11 @@ const Dashboard = () => {
                     />
                 </div>
 
-                <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+                <div className="dashboard-grid">
                     <Card title="Quick Stats">
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', textAlign: 'center' }}>
+                        <div className="stats-grid">
                             <div>
-                                <h3 style={{ fontSize: '2rem', color: 'var(--brand-color)', margin: 0 }}>
+                                <h3 className="text-3xl text-brand m-0">
                                     {skillData.overallStats?.projectCount || 0}
                                 </h3>
                                 <p>Projects</p>

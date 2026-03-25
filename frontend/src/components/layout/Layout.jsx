@@ -3,22 +3,14 @@ import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="min-h-100vh flex flex-col">
             <Navbar />
-            <main style={{ flex: 1, padding: '2rem 0', backgroundColor: 'var(--bg-primary)' }}>
+            <main className="flex-1 py-xl bg-primary">
                 <div className="container">
                     {children}
                 </div>
             </main>
-            <footer style={{
-                background: 'var(--bg-secondary)',
-                borderTop: '1px solid var(--border-color)',
-                padding: '1.5rem 0',
-                marginTop: 'auto',
-                textAlign: 'center',
-                color: 'var(--text-secondary)',
-                fontSize: '0.85rem'
-            }}>
+            <footer className="app-footer">
                 <div className="container">
                     &copy; Skill Verification Platform
                 </div>

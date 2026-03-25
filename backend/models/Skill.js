@@ -39,7 +39,8 @@ const skillSchema = new mongoose.Schema({
     testTimeTaken: { type: Number },
     testAttempt: { type: Number, default: 0 },
     testTakenAt: { type: Date },
-    testNextEligibleDate: { type: Date }
+    testNextEligibleDate: { type: Date },
+    pendingRound1Score: { type: Number, default: null }
 }, {
     timestamps: true
 });

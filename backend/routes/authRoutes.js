@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
 
 /**
  * @route   GET api/auth/github
@@ -48,9 +49,9 @@ router.post('/admin/login', authController.adminLogin);
 /**
  * @route   POST api/auth/admin/register
  * @desc    Register a new admin
- * @access  Public
+ * @access  Private (Admin only)
  */
-router.post('/admin/register', authController.adminRegister);
+router.post('/admin/register', [authMiddleware, adminMiddleware], authController.adminRegister);
 
 /**
  * @route   GET api/auth/me

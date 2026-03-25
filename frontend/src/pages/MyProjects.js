@@ -12,7 +12,7 @@ const MyProjects = () => {
     if (loading) {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '50vh', flexDirection: 'column', gap: '1rem' }}>
+                <div className="flex-center flex-col min-h-50vh gap-md">
                     <div className="loader"></div>
                     <p>Loading your projects...</p>
                 </div>
@@ -23,10 +23,10 @@ const MyProjects = () => {
     if (error) {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '50vh', flexDirection: 'column' }}>
-                    <h3 style={{ color: 'var(--error-color)' }}>Error Loading Projects</h3>
+                <div className="flex-center flex-col min-h-50vh">
+                    <h3 className="text-error">Error Loading Projects</h3>
                     <p>{error.message || 'Something went wrong. Please try again.'}</p>
-                    <Button variant="secondary" onClick={() => window.location.reload()} style={{ marginTop: '1rem' }}>Retry</Button>
+                    <Button variant="secondary" onClick={() => window.location.reload()} className="mt-md">Retry</Button>
                 </div>
             </Layout>
         );
@@ -34,19 +34,14 @@ const MyProjects = () => {
 
     return (
         <Layout>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="flex justify-between items-center mb-xl">
                 <h1>My Projects</h1>
                 <Button onClick={() => navigate('/upload-project')}>
                     + New Project
                 </Button>
             </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                gap: '1.5rem',
-                alignItems: 'start'
-            }}>
+            <div className="projects-grid items-start">
                 {projects && projects.length > 0 ? (
                     projects.map(project => (
                         <ProjectCard
@@ -55,9 +50,9 @@ const MyProjects = () => {
                         />
                     ))
                 ) : (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-secondary)' }}>
+                    <div className="col-span-full text-center py-2xl text-secondary">
                         <h3>No projects yet.</h3>
-                        <p style={{ marginBottom: '1.5rem' }}>Upload a project to see your skills verified!</p>
+                        <p className="mb-lg">Upload a project to see your skills verified!</p>
                         <Button variant="primary" onClick={() => navigate('/upload-project')}>Upload First Project</Button>
                     </div>
                 )}

@@ -113,11 +113,11 @@ const HRDashboard = () => {
     };
     return (
         <Layout>
-            <div style={{ padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="p-xl">
+                <div className="admin-header">
                     <div>
-                        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>HR Dashboard</h1>
-                        <p style={{ color: 'var(--text-secondary)' }}>Welcome back, {user?.fullName}. Manage your job roles and find top candidates.</p>
+                        <h1 className="text-2xl mb-sm">HR Dashboard</h1>
+                        <p className="text-secondary">Welcome back, {user?.fullName}. Manage your job roles and find top candidates.</p>
                     </div>
                     <Link to="/hr/create-role">
                         <Button variant="primary">Create New Role</Button>
@@ -125,28 +125,15 @@ const HRDashboard = () => {
                 </div>
 
                 {/* --- Search Section --- */}
-                <div style={{
-                    background: 'var(--bg-secondary)',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color)',
-                    marginBottom: '2rem'
-                }}>
-                    <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Find Candidates by Skill</h2>
-                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '1rem', marginBottom: hasSearched ? '1.5rem' : '0' }}>
+                <div className="search-section">
+                    <h2 className="text-lg mb-md">Find Candidates by Skill</h2>
+                    <form onSubmit={handleSearch} className={`flex gap-md ${hasSearched ? 'mb-lg' : 'mb-0'}`}>
                         <input
                             type="text"
                             placeholder="e.g. React, Node.js, Python"
                             value={searchSkill}
                             onChange={(e) => setSearchSkill(e.target.value)}
-                            style={{
-                                flex: 1,
-                                padding: '0.75rem',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-primary)',
-                                color: 'var(--text-primary)'
-                            }}
+                            className="search-input flex-1"
                         />
                         <Button type="submit" variant="primary" disabled={isSearching || !searchSkill.trim()}>
                             {isSearching ? 'Searching...' : 'Search'}
@@ -158,56 +145,42 @@ const HRDashboard = () => {
 
                     {hasSearched && (
                         <div>
-                            <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>
+                            <h3 className="mb-md text-md">
                                 Found {searchResults.length} candidate(s) for "{searchSkill}"
                             </h3>
 
                             {searchResults.length > 0 ? (
-                                <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+                                <div className="candidate-grid">
                                     {searchResults.map(student => (
-                                        <div key={student.studentId} style={{
-                                            background: 'var(--bg-primary)',
-                                            padding: '1rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid var(--border-color)',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center'
-                                        }}>
+                                        <div key={student.studentId} className="candidate-card">
                                             <div>
-                                                <h4 style={{ marginBottom: '0.25rem' }}>{student.name}</h4>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-                                                    <span style={{
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 'bold',
-                                                        color: student.skill.level === 'Advanced' ? 'var(--success-color)' :
-                                                            student.skill.level === 'Intermediate' ? 'var(--brand-color)' : '#f59e0b',
-                                                        backgroundColor: student.skill.level === 'Advanced' ? 'rgba(16, 185, 129, 0.1)' :
-                                                            student.skill.level === 'Intermediate' ? 'rgba(10, 102, 194, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                                        padding: '2px 8px',
-                                                        borderRadius: '12px'
-                                                    }}>
+                                                <h4 className="mb-xs">{student.name}</h4>
+                                                <div className="flex items-center gap-sm flex-wrap mb-xs">
+                                                    <span className={`text-xs font-bold ${
+                                                        student.skill.level === 'Advanced' ? 'badge-advanced' :
+                                                        student.skill.level === 'Intermediate' ? 'badge-intermediate' : 'badge-beginner'
+                                                    }`}>
                                                         {student.skill.level} ({Math.round((student.skill.finalSkillScore || student.skill.confidence) * 100)}%)
                                                     </span>
                                                     {student.skill.validationStatus === 'validated' && (
-                                                        <span style={{ fontSize: '0.7rem', color: 'var(--success-color)', fontWeight: 'bold' }}>✓ Validated</span>
+                                                        <span className="text-xs text-success font-bold">✓ Validated</span>
                                                     )}
                                                     {student.skill.validationStatus === 'expired' && (
-                                                        <span style={{ fontSize: '0.7rem', color: 'var(--error-color)', fontWeight: 'bold' }}>! Expired</span>
+                                                        <span className="text-xs text-error font-bold">! Expired</span>
                                                     )}
                                                 </div>
-                                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                                <p className="text-sm text-secondary">
                                                     {student.college} • Batch of {student.graduationYear}
                                                 </p>
                                             </div>
                                             <Link to={`/hr/students/${student.studentId}`}>
-                                                <Button variant="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Profile</Button>
+                                                <Button variant="secondary" className="btn-sm">Profile</Button>
                                             </Link>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p style={{ color: 'var(--text-secondary)' }}>No candidates found with this specific skill matching the search criteria.</p>
+                                <p className="text-secondary">No candidates found with this specific skill matching the search criteria.</p>
                             )}
                         </div>
                     )}
@@ -233,68 +206,45 @@ const HRDashboard = () => {
                     />
                 )}
 
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your Posted Roles</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                <h2 className="text-xl mb-md">Your Posted Roles</h2>
+                <div className="roles-grid">
                     {loading ? (
                         <p>Loading roles...</p>
                     ) : roles.length > 0 ? (
                         roles.map(role => (
-                            <div key={role._id} style={{
-                                background: 'var(--bg-secondary)',
-                                padding: '1.5rem',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border-color)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                position: 'relative' // For absolute positioning of the delete button
-                            }}>
+                            <div key={role._id} className="role-card-container">
                                 {/* Delete Button */}
                                 <button
                                     onClick={() => handleDelete(role._id)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '10px',
-                                        right: '10px',
-                                        background: 'none',
-                                        border: 'none',
-                                        color: 'var(--error-color)',
-                                        fontSize: '1.2rem',
-                                        cursor: 'pointer',
-                                        padding: '5px',
-                                        opacity: 0.7,
-                                        transition: 'opacity 0.2s ease'
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.opacity = 1}
-                                    onMouseLeave={(e) => e.target.style.opacity = 0.7}
+                                    className="btn-delete-role"
                                     title="Delete Role"
                                 >
                                     Delete
                                 </button>
-                                <div style={{ marginTop: '10px' }}> {/* Margin to avoid overlapping with delete button */}
-                                    <h3 style={{ marginBottom: '0.5rem', paddingRight: '25px' }}>{role.title}</h3>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                <div className="mt-10px"> {/* Margin to avoid overlapping with delete button */}
+                                    <h3 className="mb-sm pr-45px">{role.title}</h3>
+                                    <p className="text-sm text-secondary mb-md line-clamp-3">
                                         {role.description}
                                     </p>
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <p style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.3rem' }}>Required Skills:</p>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                    <div className="mb-md">
+                                        <p className="text-xs font-bold mb-xs">Required Skills:</p>
+                                        <div className="flex flex-wrap gap-xs">
                                             {role.requiredSkills.map((s, idx) => (
-                                                <span key={idx} style={{ background: 'var(--bg-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                                <span key={idx} className="skill-tag">
                                                     {s.skillName} (w:{s.weight})
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-                                <Link to={`/hr/roles/${role._id}`} style={{ width: '100%' }}>
-                                    <Button variant="secondary" style={{ width: '100%' }}>View Rankings</Button>
+                                <Link to={`/hr/roles/${role._id}`} className="w-full">
+                                    <Button variant="secondary" className="w-full">View Rankings</Button>
                                 </Link>
                             </div>
                         ))
                     ) : (
-                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-                            <p style={{ marginBottom: '1rem' }}>No roles created yet.</p>
+                        <div className="roles-empty">
+                            <p className="mb-md">No roles created yet.</p>
                             <Link to="/hr/create-role">
                                 <Button variant="primary">Post Your First Job Role</Button>
                             </Link>

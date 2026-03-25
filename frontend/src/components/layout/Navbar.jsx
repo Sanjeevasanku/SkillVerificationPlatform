@@ -15,44 +15,34 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
 
+    const getHomeLink = () => {
+        if (!user) return '/login';
+        if (user.role === 'admin') return '/admin/dashboard';
+        if (user.role === 'hr') return '/hr/dashboard';
+        return '/dashboard';
+    };
+
     return (
-        <nav style={{
-            background: 'var(--bg-secondary)',
-            borderBottom: '1px solid var(--border-color)',
-            padding: '0.75rem 0',
-            position: 'sticky',
-            top: 0,
-            zIndex: 100
-        }}>
-            <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Link to="/" style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--brand-color)', textDecoration: 'none' }}>
+        <nav className="app-navbar">
+            <div className="container flex justify-between items-center">
+                <Link to={getHomeLink()} className="text-xl font-bold text-brand no-underline">
                     SkillVerify
                 </Link>
 
                 {user ? (
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div className="flex gap-lg items-center">
+                        <div className="flex gap-md">
                             {user.role === 'admin' ? (
                                 <>
                                     <Link
                                         to="/admin/dashboard"
-                                        style={{
-                                            color: isActive('/admin/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                            borderBottom: isActive('/admin/dashboard') ? '2px solid var(--text-primary)' : 'none',
-                                            paddingBottom: '4px',
-                                            textDecoration: 'none'
-                                        }}
+                                        className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
                                     >
                                         Admin Panel
                                     </Link>
                                     <Link
                                         to="/admin/review-queue"
-                                        style={{
-                                            color: isActive('/admin/review-queue') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                            borderBottom: isActive('/admin/review-queue') ? '2px solid var(--text-primary)' : 'none',
-                                            paddingBottom: '4px',
-                                            textDecoration: 'none'
-                                        }}
+                                        className={`nav-link ${isActive('/admin/review-queue') ? 'active' : ''}`}
                                     >
                                         Review Queue
                                     </Link>
@@ -60,12 +50,7 @@ const Navbar = () => {
                             ) : user.role === 'hr' ? (
                                 <Link
                                     to="/hr/dashboard"
-                                    style={{
-                                        color: isActive('/hr/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        borderBottom: isActive('/hr/dashboard') ? '2px solid var(--text-primary)' : 'none',
-                                        paddingBottom: '4px',
-                                        textDecoration: 'none'
-                                    }}
+                                    className={`nav-link ${isActive('/hr/dashboard') ? 'active' : ''}`}
                                 >
                                     HR Dashboard
                                 </Link>
@@ -73,23 +58,13 @@ const Navbar = () => {
                                 <>
                                     <Link
                                         to="/dashboard"
-                                        style={{
-                                            color: isActive('/dashboard') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                            borderBottom: isActive('/dashboard') ? '2px solid var(--text-primary)' : 'none',
-                                            paddingBottom: '4px',
-                                            textDecoration: 'none'
-                                        }}
+                                        className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
                                     >
                                         Dashboard
                                     </Link>
                                     <Link
                                         to="/my-projects"
-                                        style={{
-                                            color: isActive('/my-projects') ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                            borderBottom: isActive('/my-projects') ? '2px solid var(--text-primary)' : 'none',
-                                            paddingBottom: '4px',
-                                            textDecoration: 'none'
-                                        }}
+                                        className={`nav-link ${isActive('/my-projects') ? 'active' : ''}`}
                                     >
                                         My Projects
                                     </Link>
@@ -97,18 +72,18 @@ const Navbar = () => {
                             )}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{user.fullName}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user.role}</span>
+                        <div className="flex items-center gap-md nav-user-section">
+                            <div className="flex flex-col items-end pr-sm">
+                                <span className="text-sm font-semibold">{user.fullName || user.githubUsername || 'User'}</span>
+                                <span className="text-xs text-brand uppercase" style={{ letterSpacing: '0.05em' }}>{user.role}</span>
                             </div>
-                            <Button variant="ghost" size="small" onClick={handleLogout}>
+                            <Button variant="secondary" size="small" onClick={handleLogout}>
                                 Logout
                             </Button>
                         </div>
                     </div>
                 ) : (
-                    <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div className="flex gap-md">
                         <Link to="/login">
                             <Button variant="ghost">Login</Button>
                         </Link>

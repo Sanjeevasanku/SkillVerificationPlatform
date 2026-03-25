@@ -161,8 +161,7 @@ const SkillTest = () => {
                     answer: answers[q.id],
                     correctAnswer: q.correctAnswer
                 })),
-                timeTaken: timer,
-                round1Score
+                timeTaken: timer
             };
 
             const res = await api.post('/skills/test/final', payload);
@@ -188,9 +187,9 @@ const SkillTest = () => {
     if (phase === 'loading') {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
+                <div className="flex-center flex-col min-h-50vh gap-md">
                     <div className="loader"></div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Generating questions for <strong>{skillName}</strong>...</p>
+                    <p className="text-secondary">Generating questions for <strong>{skillName}</strong>...</p>
                 </div>
             </Layout>
         );
@@ -199,8 +198,8 @@ const SkillTest = () => {
     if (phase === 'error') {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
-                    <h2 style={{ color: 'var(--error-color)' }}> {error}</h2>
+                <div className="flex-center flex-col min-h-50vh gap-md">
+                    <h2 className="text-error"> {error}</h2>
                     <Button variant="secondary" onClick={() => navigate('/dashboard')}>
                         Back to Dashboard
                     </Button>
@@ -212,10 +211,10 @@ const SkillTest = () => {
     if (phase === 'evaluating') {
         return (
             <Layout>
-                <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '1rem' }}>
+                <div className="flex-center flex-col min-h-50vh gap-md">
                     <div className="loader"></div>
-                    <h3 style={{ color: 'var(--text-primary)' }}>Evaluating your answers...</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Our AI is reviewing your responses. Hang tight.</p>
+                    <h3 className="text-primary">Evaluating your answers...</h3>
+                    <p className="text-secondary">Our AI is reviewing your responses. Hang tight.</p>
                 </div>
             </Layout>
         );
@@ -226,48 +225,41 @@ const SkillTest = () => {
 
         return (
             <Layout>
-                <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-                    <Card style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-                        <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: finalResult.totalScore >= 4 ? 'var(--success-color)' : finalResult.totalScore >= 2 ? 'var(--brand-color)' : 'var(--error-color)' }}>
+                <div className="max-w-700 mx-auto">
+                    <Card className="text-center" style={{ padding: '3rem 2rem' }}>
+                        <h1 className="text-2xl mb-xs" style={{ color: finalResult.totalScore >= 4 ? 'var(--success-color)' : finalResult.totalScore >= 2 ? 'var(--brand-color)' : 'var(--error-color)' }}>
                             {finalResult.totalScore >= 4 ? 'Excellent Performance' : finalResult.totalScore >= 2 ? 'Good Effort' : 'Needs Improvement'}
                         </h1>
-                        <h2 style={{ marginBottom: '0.5rem' }}>Test Complete</h2>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{skillName}</p>
+                        <h2 className="mb-xs">Test Complete</h2>
+                        <p className="text-secondary mb-xl">{skillName}</p>
 
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: '3rem',
-                            marginBottom: '2rem'
-                        }}>
+                        <div className="flex justify-center mb-xl" style={{ gap: '3rem' }}>
                             <div>
-                                <h3 style={{
-                                    fontSize: '2.5rem',
-                                    color: scorePercent >= 60 ? 'var(--success-color)' : 'var(--error-color)',
-                                    margin: 0
+                                <h3 className="text-4xl m-0" style={{
+                                    color: scorePercent >= 60 ? 'var(--success-color)' : 'var(--error-color)'
                                 }}>
                                     {finalResult.totalScore}/{finalResult.maxScore}
                                 </h3>
-                                <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>Score</p>
+                                <p className="text-sm text-tertiary">Score</p>
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '2.5rem', color: 'var(--brand-color)', margin: 0 }}>
+                                <h3 className="text-4xl text-brand m-0">
                                     {formatTime(finalResult.timeTaken)}
                                 </h3>
-                                <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>Time</p>
+                                <p className="text-sm text-tertiary">Time</p>
                             </div>
                         </div>
 
                         {finalResult.maxScore === 6 && finalResult.round1Score !== undefined && (
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                            <p className="text-secondary mb-lg text-sm">
                                 Round 1: {finalResult.round1Score}/4 • Round 2: {finalResult.round2Score}/2
                             </p>
                         )}
 
                         {/* Feedback */}
                         {(round1Evaluation || round2Evaluation) && (
-                            <div style={{ textAlign: 'left', marginTop: '1.5rem' }}>
-                                <h4 style={{ marginBottom: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+                            <div className="text-left mt-lg">
+                                <h4 className="mb-md text-secondary uppercase text-xs tracking-wider">
                                     Evaluation Breakdown
                                 </h4>
                                 {round1Evaluation && round1Evaluation.map(ev => (
@@ -278,8 +270,8 @@ const SkillTest = () => {
                                         backgroundColor: ev.score === 1 ? 'rgba(5, 118, 66, 0.08)' : 'rgba(204, 16, 22, 0.08)',
                                         border: `1px solid ${ev.score === 1 ? 'rgba(5, 118, 66, 0.2)' : 'rgba(204, 16, 22, 0.2)'}`
                                     }}>
-                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '' : ''}</span>
-                                        <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontSize: '0.9rem' }}>{ev.feedback}</span>
+                                        <span className="font-semibold">Q{ev.id}: {ev.score === 1 ? '✓' : '✗'}</span>
+                                        <span className="text-secondary ml-sm text-sm">{ev.feedback}</span>
                                     </div>
                                 ))}
                                 {round2Evaluation && round2Evaluation.map(ev => (
@@ -290,8 +282,8 @@ const SkillTest = () => {
                                         backgroundColor: ev.score === 1 ? 'rgba(5, 118, 66, 0.08)' : 'rgba(204, 16, 22, 0.08)',
                                         border: `1px solid ${ev.score === 1 ? 'rgba(5, 118, 66, 0.2)' : 'rgba(204, 16, 22, 0.2)'}`
                                     }}>
-                                        <span style={{ fontWeight: '600' }}>Q{ev.id}: {ev.score === 1 ? '' : ''}</span>
-                                        <span style={{ color: 'var(--text-secondary)', marginLeft: '0.5rem', fontSize: '0.9rem' }}>{ev.feedback}</span>
+                                        <span className="font-semibold">Q{ev.id}: {ev.score === 1 ? '✓' : '✗'}</span>
+                                        <span className="text-secondary ml-sm text-sm">{ev.feedback}</span>
                                     </div>
                                 ))}
                             </div>
@@ -300,7 +292,7 @@ const SkillTest = () => {
                         <Button
                             variant="primary"
                             onClick={() => navigate('/dashboard')}
-                            style={{ marginTop: '2rem' }}
+                            className="mt-xl"
                         >
                             Back to Dashboard
                         </Button>
@@ -316,89 +308,64 @@ const SkillTest = () => {
 
     return (
         <Layout>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div className="max-w-800 mx-auto">
                 {/* Header with timer */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '2rem',
-                    position: 'sticky',
-                    top: 0,
-                    background: 'var(--bg-primary)',
-                    padding: '1rem 0',
-                    zIndex: 10,
-                    borderBottom: '1px solid var(--border-color)'
-                }}>
+                <div className="test-header">
                     <div>
-                        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
+                        <h1 className="m-0 text-2xl">
                             Skill Test {isRound2 && '— Bonus Round'}
                         </h1>
-                        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>
+                        <p className="text-secondary m-0 text-sm">
                             {skillName} • Round {currentRound}/{isRound2 ? 2 : '?'}
                         </p>
                     </div>
-                    <div style={{
-                        background: timerRunning ? 'var(--brand-color)' : 'var(--text-tertiary)',
-                        color: '#fff',
-                        padding: '8px 20px',
-                        borderRadius: '50px',
-                        fontWeight: '700',
-                        fontSize: '1.2rem',
-                        fontVariantNumeric: 'tabular-nums',
-                        transition: 'background 0.3s ease'
-                    }}>
+                    <div 
+                        className="test-timer"
+                        style={{
+                            background: timerRunning ? 'var(--brand-color)' : 'var(--text-tertiary)',
+                        }}
+                    >
                         {formatTime(timer)}
                     </div>
                 </div>
 
                 {isRound2 && round1Evaluation && (
-                    <Card style={{ marginBottom: '1.5rem', backgroundColor: 'rgba(10, 102, 194, 0.05)' }}>
-                        <p style={{ margin: 0, fontWeight: '600', color: 'var(--brand-color)' }}>
+                    <Card className="mb-lg" style={{ backgroundColor: 'rgba(10, 102, 194, 0.05)' }}>
+                        <p className="m-0 font-semibold text-brand">
                             Round 1 Score: {round1Score}/4 — Well done. Now attempt 2 expert-level questions.
                         </p>
                     </Card>
                 )}
 
                 {error && (
-                    <Card style={{ marginBottom: '1rem', backgroundColor: 'rgba(204, 16, 22, 0.05)', border: '1px solid rgba(204, 16, 22, 0.2)' }}>
-                        <p style={{ margin: 0, color: 'var(--error-color)' }}>{error}</p>
+                    <Card className="mb-md" style={{ backgroundColor: 'rgba(204, 16, 22, 0.05)', border: '1px solid rgba(204, 16, 22, 0.2)' }}>
+                        <p className="m-0 text-error">{error}</p>
                     </Card>
                 )}
 
                 {/* Questions */}
                 {questions.map((q, idx) => (
-                    <Card key={q.id} style={{ marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <span style={{
-                                padding: '4px 12px',
-                                borderRadius: '50px',
-                                fontSize: '0.8rem',
-                                fontWeight: '700',
-                                color: '#fff',
-                                backgroundColor: difficultyColors[q.difficulty] || 'var(--brand-color)'
-                            }}>
+                    <Card key={q.id} className="mb-lg">
+                        <div className="flex justify-between items-center mb-md">
+                            <span 
+                                className="difficulty-badge"
+                                style={{
+                                    backgroundColor: difficultyColors[q.difficulty] || 'var(--brand-color)'
+                                }}
+                            >
                                 {difficultyLabels[q.difficulty] || q.difficulty}
                             </span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+                            <span className="text-secondary text-sm">
                                 {q.skill}
                             </span>
                         </div>
 
-                        <p style={{ color: 'var(--text-primary)', fontWeight: '500', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
+                        <p className="text-primary font-medium text-lg leading-relaxed mb-lg">
                             {q.question.split('___').map((part, i, arr) => (
                                 <React.Fragment key={i}>
                                     {part}
                                     {i < arr.length - 1 && (
-                                        <span style={{
-                                            display: 'inline-block',
-                                            minWidth: '120px',
-                                            borderBottom: '2px solid var(--brand-color)',
-                                            margin: '0 4px',
-                                            textAlign: 'center',
-                                            color: 'var(--brand-color)',
-                                            fontWeight: '700'
-                                        }}>
+                                        <span className="fill-blank">
                                             {answers[q.id] || '  ?  '}
                                         </span>
                                     )}
@@ -412,25 +379,13 @@ const SkillTest = () => {
                             value={answers[q.id] || ''}
                             onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                             autoComplete="off"
-                            style={{
-                                width: '100%',
-                                padding: '0.7rem 1rem',
-                                border: '2px solid var(--border-color)',
-                                borderRadius: 'var(--radius-md)',
-                                fontSize: '1rem',
-                                fontFamily: 'inherit',
-                                backgroundColor: 'var(--bg-secondary)',
-                                color: 'var(--text-primary)',
-                                transition: 'border-color 0.2s, box-shadow 0.2s'
-                            }}
-                            onFocus={(e) => { e.target.style.borderColor = 'var(--brand-color)'; e.target.style.boxShadow = '0 0 0 3px rgba(10, 102, 194, 0.1)'; }}
-                            onBlur={(e) => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
+                            className="test-input"
                         />
                     </Card>
                 ))}
 
                 {/* Submit */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '3rem' }}>
+                <div className="flex justify-end gap-md mb-2xl">
                     <Button
                         variant="ghost"
                         onClick={() => setIsConfirmOpen(true)}

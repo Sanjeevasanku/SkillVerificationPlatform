@@ -19,13 +19,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ReviewQueue = lazy(() => import('./pages/ReviewQueue'));
 
 const LoadingFallback = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: 'var(--bg-primary)'
-  }}>
+  <div className="loading-fallback">
     <div className="loader"></div>
   </div>
 );

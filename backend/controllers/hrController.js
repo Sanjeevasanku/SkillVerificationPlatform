@@ -44,9 +44,8 @@ exports.createRole = async (req, res) => {
  */
 exports.getAllRoles = async (req, res) => {
     try {
-        // Find all roles
-        const roles = await Role.find()
-            .populate('createdBy', 'fullName email')
+        // Find roles created by this HR user
+        const roles = await Role.find({ createdBy: req.user.id })
             .sort({ createdAt: -1 });
 
         res.json(roles);
@@ -101,10 +100,10 @@ exports.deleteRole = async (req, res) => {
             return res.status(404).json({ message: 'Role not found' });
         }
 
-        // Optional: Ensure only the creator or an admin can delete
-        // if (role.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
-        //     return res.status(401).json({ message: 'User not authorized to delete this role' });
-        // }
+        // Ensure only the creator can delete
+        if (role.createdBy.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'User not authorized to delete this role' });
+        }
 
         await role.deleteOne();
 
