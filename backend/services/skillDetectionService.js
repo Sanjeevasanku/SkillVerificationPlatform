@@ -384,11 +384,16 @@ function filterAndDeduplicateSkills(skills, minConfidence = 0.4) {
     for (const skill of filtered) {
         const key = DEDUP_MAP[skill.name.toLowerCase()] || skill.name;
         const existing = seen.get(key);
-        if (!existing || skill.confidenceScore > existing.confidenceScore) {
+        if (!existing) {
             seen.set(key, { ...skill, name: key });
-        } else if (existing) {
+        } else {
             // Merge evidence from duplicates
             existing.evidence = [...new Set([...existing.evidence, ...skill.evidence])];
+            // Keep the highest confidence score and its associated category
+            if (skill.confidenceScore > existing.confidenceScore) {
+                existing.confidenceScore = skill.confidenceScore;
+                existing.category = skill.category;
+            }
         }
     }
 
@@ -465,9 +470,15 @@ function extractSkillsWithRules(files) {
  * Detect skills from a repository.
  * Priority: Ollama (local) → Groq (cloud) → Rule-based (fallback)
  */
+// Export internal functions for unit testing
+if (process.env.NODE_ENV === 'test') {
+    module.exports.normalizeSkillResults = normalizeSkillResults;
+    module.exports.filterAndDeduplicateSkills = filterAndDeduplicateSkills;
+}
+
 exports.detectSkills = async (owner, repo) => {
     try {
-        console.log(`🔍 Detecting skills for ${owner}/${repo}...`);
+        console.log(`Detecting skills for ${owner}/${repo}...`);
 
         // 1. Traverse and fetch files
         const files = await getRepoFiles(owner, repo);
@@ -482,7 +493,21 @@ exports.detectSkills = async (owner, repo) => {
         const mode = process.env.SKILL_DETECTION_MODE || 'llm';
 
         if (mode === 'llm') {
-            // Try Ollama first
+            // Try Groq first (Cloud LLM)
+            if (process.env.GROQ_API_KEY) {
+                try {
+                    console.log('[SkillDetection] Trying Groq cloud LLM...');
+                    const skills = await extractSkillsWithGroq(files);
+                    console.log(` Groq skill detection complete. Found ${skills.length} skills.`);
+                    return skills;
+                } catch (groqError) {
+                    console.error(`[SkillDetection] Groq failed: ${groqError.message}`);
+                }
+            } else {
+                console.warn('[SkillDetection] GROQ_API_KEY not set.');
+            }
+
+            // Try Ollama second (Local LLM)
             const ollamaReady = await ollamaService.isAvailable();
             if (ollamaReady) {
                 try {
@@ -495,18 +520,6 @@ exports.detectSkills = async (owner, repo) => {
                 }
             } else {
                 console.warn('[SkillDetection] Ollama not available.');
-            }
-
-            // Try Groq as second option
-            if (process.env.GROQ_API_KEY) {
-                try {
-                    console.log('[SkillDetection] Trying Groq cloud LLM...');
-                    const skills = await extractSkillsWithGroq(files);
-                    console.log(` Groq skill detection complete. Found ${skills.length} skills.`);
-                    return skills;
-                } catch (groqError) {
-                    console.error(`[SkillDetection] Groq failed: ${groqError.message}`);
-                }
             }
 
             console.log('[SkillDetection] All LLM providers unavailable. Falling back to rule-based detection.');

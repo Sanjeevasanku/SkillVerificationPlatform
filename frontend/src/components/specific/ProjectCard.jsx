@@ -48,8 +48,8 @@ const ProjectCard = ({ project }) => {
                 <h3 className="m-0 text-xl text-brand">{project.title}</h3>
                 <div className="project-card-badges-col">
                     {getVerificationBadge()}
-                    <span 
-                        className="project-card-badge text-white" 
+                    <span
+                        className="project-card-badge text-white"
                         style={{ backgroundColor: getContributionColor(project.contributionPercentage) }}
                     >
                         {project.contributionPercentage}% Contrib
@@ -68,17 +68,30 @@ const ProjectCard = ({ project }) => {
             </p>
 
             <div className="mb-lg">
-                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
+                <div className="flex justify-between items-center mb-sm">
+                    <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', margin: 0, letterSpacing: '0.05em' }}>Verified Tech Stack</h4>
+                    {project.riskBand === 'red' && (
+                        <span className="text-error text-xs font-bold flex items-center gap-xs">
+                            ⚠️ Low Reliability
+                        </span>
+                    )}
+                </div>
                 {hasSkills ? (
-                    <div className="project-card-skills-container">
+                    <div className={`project-card-skills-container ${project.riskBand === 'red' ? 'opacity-70' : ''}`}>
                         {project.skills.map((skill, i) => {
-                            const barColor = 'var(--brand-color)';
+                            let barColor = 'var(--brand-color)';
+                            if (project.riskBand === 'red') barColor = 'var(--error-color)';
+                            else if (project.riskBand === 'amber') barColor = '#eab308';
+
                             return (
                                 <div key={i} className="project-card-skill-col">
                                     <div
-                                        title={`${skill.name}: ${(skill.confidenceScore * 100).toFixed(0)}%`}
+                                        title={`${skill.name}: ${(skill.confidenceScore * 100).toFixed(0)}% ${project.riskBand !== 'green' ? '(Inconsistency detected in metrics)' : ''}`}
                                         className="project-card-skill-bar"
-                                        style={{ height: `${skill.confidenceScore * 100}%` }}
+                                        style={{
+                                            height: `${skill.confidenceScore * 100}%`,
+                                            backgroundColor: barColor
+                                        }}
                                     >
                                         <span style={{
                                             position: 'absolute', top: '-20px', left: '50%',
@@ -98,6 +111,11 @@ const ProjectCard = ({ project }) => {
                 ) : (
                     <p className="text-sm text-tertiary italic">
                         ⏳ Skill analysis running in background…
+                    </p>
+                )}
+                {project.riskBand !== 'green' && (
+                    <p className="text-xs mt-sm italic" style={{ color: project.riskBand === 'red' ? 'var(--error-color)' : '#d97706' }}>
+                        * Inconsistencies detected in authorship or commit patterns.
                     </p>
                 )}
             </div>
